@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+    <body>
+        <h1>🏁 Contest Alert Dashboard</h1>
+
+        <div class="container">
+
+            <div class="card">
+                <h2>⚙️ Preferences</h2>
+
+                <label>Email</label>
+                <input type="email" id="email" placeholder="Enter your Gmail">
+
+                <label>Select Platforms</label>
+                <div class="platforms">
+                    <label><input type="checkbox" value="leetcode"> LeetCode</label>
+                    <label><input type="checkbox" value="codeforces"> Codeforces</label>
+                    <label><input type="checkbox" value="codechef"> CodeChef</label>
+                    <label><input type="checkbox" value="gfg"> GeeksforGeeks</label>
+                </div>
+
+                <label>Alert Before</label>
+                <select id="alertTime">
+                    <option value="10">10 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="60">1 hour</option>
+                </select>
+
+                <button id="saveBtn">Save Preferences</button>
+            </div>
+
+            <div class="card">
+                <h2>📅 Upcoming Contests</h2>
+                <ul id="contestList">
+                    <li>No contests available yet.</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <script src="app.js"></script>
+    </body>
+
+</html>
