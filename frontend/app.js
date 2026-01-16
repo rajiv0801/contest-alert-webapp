@@ -1,15 +1,22 @@
-console.log("JS Loaded");
 
+//This is for dark mode
 document.addEventListener("DOMContentLoaded", () => {
     const themeToggle = document.getElementById("darkmode-toggle");
 
-    if (!themeToggle) {
-        console.error("Toggle element not found");
-        return;
+    // Load saved theme
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+        document.body.classList.add("dark");
+        themeToggle.checked = true;
     }
-
+    // Apply theme
     themeToggle.addEventListener("change", () => {
-        console.log("Toggle clicked:", themeToggle.checked);
-        document.body.classList.toggle("dark", themeToggle.checked);
+        if (themeToggle.checked) {
+            document.body.classList.add("dark");
+            localStorage.setItem("theme", "dark");
+        } else {
+            document.body.classList.remove("dark");
+            localStorage.setItem("theme", "light");
+        }
     });
 });
