@@ -7,7 +7,26 @@
     <title>Document</title>
 </head>
     <body>
-        <h1>🏁 Contest Alert Dashboard</h1>
+        <div class="top-bar">
+            <h1>🏁 Contest Alert Dashboard</h1>
+
+            <!-- Dark Mode Toggle -->
+            <div class="darkThemeBtn">
+                <input id="darkmode-toggle" type="checkbox">
+                <label for="darkmode-toggle">
+                    <!-- Sun Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="sun">
+                        <circle cx="256" cy="256" r="90"/>
+                    </svg>
+
+                    <!-- Moon Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="moon">
+                        <path d="M256 32c-88 0-160 72-160 160s72 160 160 160 160-72 160-160S344 32 256 32z"/>
+                    </svg>
+                </label>
+                <span class="fake-body"></span>
+            </div>
+        </div>
 
         <div class="container">
 
