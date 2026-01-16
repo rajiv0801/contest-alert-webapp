@@ -1,122 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contest Alert Dashboard</title>
 
     <!-- Remix Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
 
-    <link rel="stylesheet" href="style.css">
-</head>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
+  <body>
+    <div class="top-bar">
+      <h1>🏁 Contest Alert Dashboard</h1>
 
-<div class="top-bar">
-    <h1>🏁 Contest Alert Dashboard</h1>
-
-    <div class="darkThemeBtn">
-        <input id="darkmode-toggle" type="checkbox">
+      <div class="darkThemeBtn">
+        <input id="darkmode-toggle" type="checkbox" />
         <label for="darkmode-toggle">
-            <i class="ri-sun-line sun"></i>
-            <i class="ri-moon-line moon"></i>
+          <i class="ri-sun-line sun"></i>
+          <i class="ri-moon-line moon"></i>
         </label>
+      </div>
     </div>
-</div>
 
-<div class="container">
-
-    <!-- Preferences -->
-    <div class="card">
+    <div class="container">
+      <!-- Preferences -->
+      <div class="card">
         <h2>⚙️ Preferences</h2>
 
         <div class="google-connect">
-            <button id="googleLoginBtn" class="google-btn">
-                <i class="ri-google-line"></i>
-                <span>Connect Google Account</span>
-            </button>
-            <span id="userEmail" class="google-status">Not connected</span>
+          <button id="googleLoginBtn" class="google-btn">
+            <i class="ri-google-line"></i>
+            <span>Connect Google Account</span>
+          </button>
+          <span id="userEmail" class="google-status">Not connected</span>
         </div>
 
         <label>Select Platforms</label>
 
         <div class="platforms">
-
-            <label class="check-container">
-                <input type="checkbox" value="leetcode">
-                <svg viewBox="0 0 64 64">
-                    <path class="check-path"
-                        d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 
+          <label class="check-container">
+            <input type="checkbox" value="leetcode" />
+            <svg viewBox="0 0 64 64">
+              <path
+                class="check-path"
+                d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 
                            A 8 8 90 0 0 64 56 V 8 
                            A 8 8 90 0 0 56 0 H 8 
                            A 8 8 90 0 0 0 8 
-                           V 16 L 32 48 L 64 16"/>
-                </svg>
-                <span>LeetCode</span>
-            </label>
+                           V 16 L 32 48 L 64 16"
+              />
+            </svg>
+            <span>LeetCode</span>
+          </label>
 
-            <label class="check-container">
-                <input type="checkbox" value="codeforces">
-                <svg viewBox="0 0 64 64">
-                    <path class="check-path"
-                        d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 
+          <label class="check-container">
+            <input type="checkbox" value="codeforces" />
+            <svg viewBox="0 0 64 64">
+              <path
+                class="check-path"
+                d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 
                            A 8 8 90 0 0 64 56 V 8 
                            A 8 8 90 0 0 56 0 H 8 
                            A 8 8 90 0 0 0 8 
-                           V 16 L 32 48 L 64 16"/>
-                </svg>
-                <span>Codeforces</span>
-            </label>
+                           V 16 L 32 48 L 64 16"
+              />
+            </svg>
+            <span>Codeforces</span>
+          </label>
 
-            <label class="check-container">
-                <input type="checkbox" value="codechef">
-                <svg viewBox="0 0 64 64">
-                    <path class="check-path"
-                        d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 
+          <label class="check-container">
+            <input type="checkbox" value="codechef" />
+            <svg viewBox="0 0 64 64">
+              <path
+                class="check-path"
+                d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 
                            A 8 8 90 0 0 64 56 V 8 
                            A 8 8 90 0 0 56 0 H 8 
                            A 8 8 90 0 0 0 8 
-                           V 16 L 32 48 L 64 16"/>
-                </svg>
-                <span>CodeChef</span>
-            </label>
+                           V 16 L 32 48 L 64 16"
+              />
+            </svg>
+            <span>CodeChef</span>
+          </label>
 
-            <label class="check-container">
-                <input type="checkbox" value="gfg">
-                <svg viewBox="0 0 64 64">
-                    <path class="check-path"
-                        d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 
+          <label class="check-container">
+            <input type="checkbox" value="gfg" />
+            <svg viewBox="0 0 64 64">
+              <path
+                class="check-path"
+                d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 
                            A 8 8 90 0 0 64 56 V 8 
                            A 8 8 90 0 0 56 0 H 8 
                            A 8 8 90 0 0 0 8 
-                           V 16 L 32 48 L 64 16"/>
-                </svg>
-                <span>GeeksforGeeks</span>
-            </label>
-
+                           V 16 L 32 48 L 64 16"
+              />
+            </svg>
+            <span>GeeksforGeeks</span>
+          </label>
         </div>
 
         <label>Alert Before</label>
         <select id="alertTime">
-            <option value="10">10 minutes</option>
-            <option value="30">30 minutes</option>
-            <option value="60">1 hour</option>
+          <option value="10">10 minutes</option>
+          <option value="30">30 minutes</option>
+          <option value="60">1 hour</option>
         </select>
 
-        <button id="saveBtn">Create Reminder</button>
-    </div>
+        <button id="saveBtn" title="Connect Google account first">Create Reminder</button>
+        <p id="statusMsg" class="status-msg"></p>
+      </div>
 
-    <!-- Upcoming Contests -->
-    <div class="card">
+      <!-- Upcoming Contests -->
+      <div class="card">
         <h2>📅 Upcoming Contests</h2>
         <ul id="contestList">
-            <li>Not joined yet.</li>
+          <li>Not joined yet.</li>
         </ul>
+      </div>
     </div>
 
-</div>
-
-<script src="app.js"></script>
-</body>
+    <script src="app.js"></script>
+  </body>
 </html>

@@ -1,288 +1,311 @@
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: "Segoe UI", Arial, sans-serif;
-    background: linear-gradient(135deg, #eef2ff, #f9fafb);
-    margin: 0;
-    padding: 20px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #eef2ff, #f9fafb);
+  margin: 0;
+  padding: 20px;
 }
 
 body.dark {
-    background: #0f172a;
-    color: #e5e7eb;
+  background: #0f172a;
+  color: #e5e7eb;
 }
 
 h1 {
-    text-align: center;
-    margin-bottom: 30px;
+  text-align: center;
+  margin-bottom: 30px;
 }
 
 /* ---------- Top Bar ---------- */
 
 .top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 1000px;
-    margin: auto;
-    padding: 10px 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1000px;
+  margin: auto;
+  padding: 10px 0 20px;
 }
 
 /* ---------- Layout ---------- */
 
 .container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 28px;
-    max-width: 1000px;
-    margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  max-width: 1000px;
+  margin: auto;
 }
 
 /* ---------- Cards ---------- */
 
 .card {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
 body.dark .card {
-    background: #020617;
-    color: #e5e7eb;
+  background: #020617;
+  color: #e5e7eb;
 }
 
 .card h2 {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 /* ---------- Forms ---------- */
 
 label {
-    display: block;
-    margin-top: 12px;
-    font-weight: 600;
+  display: block;
+  margin-top: 12px;
+  font-weight: 600;
 }
 
 input:not([type="checkbox"]),
 select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 6px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
 body.dark input:not([type="checkbox"]),
 body.dark select {
-    background: #020617;
-    color: #e5e7eb;
-    border-color: #334155;
+  background: #020617;
+  color: #e5e7eb;
+  border-color: #334155;
 }
 
 /* ---------- Google Button ---------- */
 
 .google-connect {
-    margin: 12px 0 18px;
+  margin: 12px 0 18px;
 }
 
 .google-btn {
-    width: 100%;
-    height: 48px;
-    border-radius: 10px;
-    border: 1px solid #c7cbd1;
-    background: #f8fafc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    color: #111827;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  width: 100%;
+  height: 48px;
+  border-radius: 10px;
+  border: 1px solid #c7cbd1;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #111827;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .google-btn i {
-    font-size: 20px;
+  font-size: 20px;
 }
 
 .google-btn:hover {
-    background: #eef2f7;
+  background: #eef2f7;
 }
 
 .google-status {
-    display: block;
-    margin-top: 6px;
-    font-size: 13px;
-    color: #6b7280;
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b7280;
 }
 
 body.dark .google-btn {
-    background: #020617;
-    border-color: #334155;
-    color: #e5e7eb;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  background: #020617;
+  border-color: #334155;
+  color: #e5e7eb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 body.dark .google-btn:hover {
-    filter: brightness(1.15);
+  filter: brightness(1.15);
 }
 
 body.dark .google-status {
-    color: #9ca3af;
+  color: #9ca3af;
 }
 
 /* ---------- Platforms Grid ---------- */
 
 .platforms {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 80px;
-    row-gap: 16px;
-    margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 80px;
+  row-gap: 16px;
+  margin-top: 12px;
 }
 
 /* ---------- Custom Checkbox ---------- */
 
 .check-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    user-select: none;
-    margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  margin: 0;
 }
 
 .check-container input {
-    display: none;
+  display: none;
 }
 
 .check-container svg {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .check-path {
-    fill: none;
-    stroke: #4f46e5;
-    stroke-width: 5;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    transition: stroke-dasharray 0.4s ease, stroke-dashoffset 0.4s ease;
-    stroke-dasharray: 241 9999999;
-    stroke-dashoffset: 0;
+  fill: none;
+  stroke: #4f46e5;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-dasharray 0.4s ease, stroke-dashoffset 0.4s ease;
+  stroke-dasharray: 241 9999999;
+  stroke-dashoffset: 0;
 }
 
 .check-container input:checked ~ svg .check-path {
-    stroke-dasharray: 70.5 9999999;
-    stroke-dashoffset: -262.27;
+  stroke-dasharray: 70.5 9999999;
+  stroke-dashoffset: -262.27;
 }
 
 .check-container span {
-    min-width: 130px;
-    display: inline-block;
+  min-width: 130px;
+  display: inline-block;
 }
 
 body.dark .check-path {
-    stroke: #93c5fd;
+  stroke: #93c5fd;
 }
 
 body.dark .check-container span {
-    color: #e5e7eb;
+  color: #e5e7eb;
 }
 
 /* ---------- Main Button ---------- */
 
 button {
-    margin-top: 20px;
-    width: 100%;
-    padding: 12px;
-    background: #4f46e5;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 button:hover {
-    background: #4338ca;
+  background: #4338ca;
+}
+
+/* Disabled Create Reminder button */
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #9ca3af;
+}
+
+button:disabled:hover {
+    background: #9ca3af;
+}
+
+
+
+.status-msg {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+body.dark .status-msg {
+  color: #9ca3af;
 }
 
 /* ---------- Dark Toggle ---------- */
 
 .darkThemeBtn * {
-    transition: all 0.3s;
+  transition: all 0.3s;
 }
 
 .darkThemeBtn input {
-    width: 0;
-    height: 0;
-    visibility: hidden;
+  width: 0;
+  height: 0;
+  visibility: hidden;
 }
 
 .darkThemeBtn label {
-    border: 1px solid #d1d5db;
-    background: #e5e7eb;
-    border-radius: 10px;
-    height: 46px;
-    width: 46px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    cursor: pointer;
+  border: 1px solid #d1d5db;
+  background: #e5e7eb;
+  border-radius: 10px;
+  height: 46px;
+  width: 46px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
 }
 
 .darkThemeBtn label i {
-    position: absolute;
-    font-size: 20px;
-    transition: 0.3s;
-    z-index: 1;
-    color: #000;
+  position: absolute;
+  font-size: 20px;
+  transition: 0.3s;
+  z-index: 1;
+  color: #000;
 }
 
 .darkThemeBtn label i.sun {
-    opacity: 0;
-    color: #fff;
+  opacity: 0;
+  color: #fff;
 }
 
 .darkThemeBtn label i.moon {
-    opacity: 1;
+  opacity: 1;
 }
 
 .darkThemeBtn input:checked + label {
-    background: #4a6cf7;
-    border-color: #4a6cf7;
+  background: #4a6cf7;
+  border-color: #4a6cf7;
 }
 
 .darkThemeBtn input:checked + label i.sun {
-    opacity: 1;
+  opacity: 1;
 }
 
 .darkThemeBtn input:checked + label i.moon {
-    opacity: 0;
+  opacity: 0;
 }
 
 /* ---------- List ---------- */
 
 ul {
-    padding-left: 18px;
+  padding-left: 18px;
 }
 
 li {
-    margin-bottom: 8px;
+  margin-bottom: 8px;
 }
 
 /* ---------- Responsive ---------- */
 
 @media (max-width: 768px) {
-    .container {
-        grid-template-columns: 1fr;
-    }
+  .container {
+    grid-template-columns: 1fr;
+  }
 }
