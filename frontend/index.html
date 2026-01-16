@@ -28,8 +28,15 @@
             <div class="card">
                 <h2>⚙️ Preferences</h2>
 
-                <label>Email</label>
-                <input type="email" id="email" placeholder="Enter your Gmail">
+                <div class="google-connect">
+                    <button id="googleLoginBtn" class="google-btn">
+                        <i class="ri-google-line"></i>
+                        <span>Connect Google Account</span>
+                    </button>
+                    <span id="userEmail" class="google-status">Not connected</span>
+                </div>
+
+
 
                 <label>Select Platforms</label>
                 <div class="platforms">
@@ -46,7 +53,7 @@
                     <option value="60">1 hour</option>
                 </select>
 
-                <button id="saveBtn">Save Preferences</button>
+                <button id="saveBtn">Create Reminder</button>
             </div>
 
             <div class="card">
