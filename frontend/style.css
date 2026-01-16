@@ -1,4 +1,4 @@
-*{
+* {
     box-sizing: border-box;
 }
 
@@ -9,10 +9,17 @@ body {
     padding: 20px;
 }
 
+body.dark {
+    background: #0f172a;
+    color: #e5e7eb;
+}
+
 h1 {
     text-align: center;
     margin-bottom: 30px;
 }
+
+/* ---------- Top Bar ---------- */
 
 .top-bar {
     display: flex;
@@ -23,105 +30,17 @@ h1 {
     padding: 10px 0 20px;
 }
 
-
-/* Dark Toggle Button */
-.darkThemeBtn * {
-  transition: all 0.3s;
-}
-
-.darkThemeBtn input {
-  width: 0;
-  height: 0;
-  visibility: hidden;
-}
-
-.darkThemeBtn label {
-  border: 1px solid #d1d5db;
-    background: #e5e7eb;
-    border-radius: 10px;
-    height: 46px;
-    width: 46px;
-    margin: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    cursor: pointer;
-}
-
-.darkThemeBtn label:active {
-  border-radius: 5px;
-}
-
-.darkThemeBtn label svg {
-  position: absolute;
-  width: 16px;
-  transition: 0.3s;
-  z-index: 1;
-  fill: #000;
-}
-
-.darkThemeBtn label i {
-  position: absolute;
-  font-size: 20px;
-  transition: 0.3s;
-  z-index: 1;
-  color: #000;
-}
-
-.darkThemeBtn label i.sun {
-  opacity: 0;
-  color: #fff;
-}
-
-.darkThemeBtn label i.moon {
-  opacity: 1;
-}
-
-.darkThemeBtn input:checked + label {
-    background: #4a6cf7;
-    border-color: #4a6cf7;
-}
-
-.darkThemeBtn input:checked + label i.sun {
-  opacity: 1;
-}
-
-.darkThemeBtn input:checked + label i.moon {
-  opacity: 0;
-}
-
-
-
-body.dark {
-    background: #0f172a;
-    color: #e5e7eb;
-}
-
-body.dark .card {
-    background: #020617;
-    color: #e5e7eb;
-}
-
-body.dark input,
-body.dark select {
-    background: #020617;
-    color: #e5e7eb;
-    border-color: #334155;
-}
-
-body.dark button {
-    background: #2563eb;
-}
-
+/* ---------- Layout ---------- */
 
 .container {
-    max-width: 1000px;
-    margin: auto;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 28px;
+    max-width: 1000px;
+    margin: auto;
 }
+
+/* ---------- Cards ---------- */
 
 .card {
     background: white;
@@ -130,9 +49,16 @@ body.dark button {
     box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
 
+body.dark .card {
+    background: #020617;
+    color: #e5e7eb;
+}
+
 .card h2 {
     margin-top: 0;
 }
+
+/* ---------- Forms ---------- */
 
 label {
     display: block;
@@ -140,13 +66,23 @@ label {
     font-weight: 600;
 }
 
-input, select {
+input:not([type="checkbox"]),
+select {
     width: 100%;
     padding: 10px;
     margin-top: 6px;
     border-radius: 6px;
     border: 1px solid #ccc;
 }
+
+body.dark input:not([type="checkbox"]),
+body.dark select {
+    background: #020617;
+    color: #e5e7eb;
+    border-color: #334155;
+}
+
+/* ---------- Google Button ---------- */
 
 .google-connect {
     margin: 12px 0 18px;
@@ -157,7 +93,7 @@ input, select {
     height: 48px;
     border-radius: 10px;
     border: 1px solid #c7cbd1;
-    background: #f8fafc;   /* brighter than card */
+    background: #f8fafc;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -168,7 +104,6 @@ input, select {
     box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
-
 .google-btn i {
     font-size: 20px;
 }
@@ -177,7 +112,6 @@ input, select {
     background: #eef2f7;
 }
 
-
 .google-status {
     display: block;
     margin-top: 6px;
@@ -185,7 +119,6 @@ input, select {
     color: #6b7280;
 }
 
-/* Dark mode */
 body.dark .google-btn {
     background: #020617;
     border-color: #334155;
@@ -194,22 +127,76 @@ body.dark .google-btn {
 }
 
 body.dark .google-btn:hover {
-    background: #020617;
-    filter: brightness(1.2);
+    filter: brightness(1.15);
 }
-
 
 body.dark .google-status {
     color: #9ca3af;
 }
 
+/* ---------- Platforms Grid ---------- */
 
 .platforms {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-top: 6px;
+    column-gap: 80px;
+    row-gap: 16px;
+    margin-top: 12px;
 }
+
+/* ---------- Custom Checkbox ---------- */
+
+.check-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+}
+
+.check-container input {
+    display: none;
+}
+
+.check-container svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.check-path {
+    fill: none;
+    stroke: #4f46e5;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke-dasharray 0.4s ease, stroke-dashoffset 0.4s ease;
+    stroke-dasharray: 241 9999999;
+    stroke-dashoffset: 0;
+}
+
+.check-container input:checked ~ svg .check-path {
+    stroke-dasharray: 70.5 9999999;
+    stroke-dashoffset: -262.27;
+}
+
+.check-container span {
+    min-width: 130px;
+    display: inline-block;
+}
+
+body.dark .check-path {
+    stroke: #93c5fd;
+}
+
+body.dark .check-container span {
+    color: #e5e7eb;
+}
+
+/* ---------- Main Button ---------- */
 
 button {
     margin-top: 20px;
@@ -227,6 +214,63 @@ button:hover {
     background: #4338ca;
 }
 
+/* ---------- Dark Toggle ---------- */
+
+.darkThemeBtn * {
+    transition: all 0.3s;
+}
+
+.darkThemeBtn input {
+    width: 0;
+    height: 0;
+    visibility: hidden;
+}
+
+.darkThemeBtn label {
+    border: 1px solid #d1d5db;
+    background: #e5e7eb;
+    border-radius: 10px;
+    height: 46px;
+    width: 46px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.darkThemeBtn label i {
+    position: absolute;
+    font-size: 20px;
+    transition: 0.3s;
+    z-index: 1;
+    color: #000;
+}
+
+.darkThemeBtn label i.sun {
+    opacity: 0;
+    color: #fff;
+}
+
+.darkThemeBtn label i.moon {
+    opacity: 1;
+}
+
+.darkThemeBtn input:checked + label {
+    background: #4a6cf7;
+    border-color: #4a6cf7;
+}
+
+.darkThemeBtn input:checked + label i.sun {
+    opacity: 1;
+}
+
+.darkThemeBtn input:checked + label i.moon {
+    opacity: 0;
+}
+
+/* ---------- List ---------- */
+
 ul {
     padding-left: 18px;
 }
@@ -235,10 +279,10 @@ li {
     margin-bottom: 8px;
 }
 
+/* ---------- Responsive ---------- */
+
 @media (max-width: 768px) {
     .container {
         grid-template-columns: 1fr;
     }
 }
-
-
