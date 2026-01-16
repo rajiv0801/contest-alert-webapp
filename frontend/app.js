@@ -29,3 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+const googleBtn = document.getElementById("googleLoginBtn");
+const userEmail = document.getElementById("userEmail");
+
+googleBtn.addEventListener("click", () => {
+    userEmail.innerText = "Connected: example@gmail.com";
+});
+
