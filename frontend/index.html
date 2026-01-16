@@ -33,10 +33,18 @@
         <h2>⚙️ Preferences</h2>
 
         <div class="google-connect">
-          <button id="googleLoginBtn" class="google-btn">
-            <i class="ri-google-line"></i>
-            <span>Connect Google Account</span>
-          </button>
+          <div class="google-header">
+            <button id="googleLoginBtn" class="google-btn">
+              <i class="ri-google-line"></i>
+              <span>Connect Google Account</span>
+            </button>
+
+            <!-- Connection Badge -->
+            <span id="connectionBadge" class="badge badge-off">
+              Not Connected
+            </span>
+          </div>
+
           <span id="userEmail" class="google-status">Not connected</span>
         </div>
 
@@ -111,16 +119,17 @@
           <option value="60">1 hour</option>
         </select>
 
-        <button id="saveBtn" title="Connect Google account first">Create Reminder</button>
+        <button id="saveBtn" title="Connect Google account first">
+          Create Reminder
+        </button>
         <p id="statusMsg" class="status-msg"></p>
       </div>
 
       <!-- Upcoming Contests -->
       <div class="card">
         <h2>📅 Upcoming Contests</h2>
-        <ul id="contestList">
-          <li>Not joined yet.</li>
-        </ul>
+        <div id="contestList" class="contest-list"></div>
+
       </div>
     </div>
 
