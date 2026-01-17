@@ -19,10 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-
 // -------------------- MAIN APP --------------------
 document.addEventListener("DOMContentLoaded", () => {
-
   const googleBtn = document.getElementById("googleLoginBtn");
   const userEmail = document.getElementById("userEmail");
   const badge = document.getElementById("connectionBadge");
@@ -35,32 +33,19 @@ document.addEventListener("DOMContentLoaded", () => {
   let isConnected = false;
 
   // -------------------- Mock Contest Data --------------------
-  const contests = [
-    {
-      platform: "leetcode",
-      title: "LeetCode Weekly Contest 390",
-      date: "Jan 20",
-      time: "8:00 PM",
-    },
-    {
-      platform: "codeforces",
-      title: "Codeforces Round 950",
-      date: "Jan 22",
-      time: "9:30 PM",
-    },
-    {
-      platform: "codechef",
-      title: "CodeChef Starters 120",
-      date: "Jan 25",
-      time: "7:00 PM",
-    },
-    {
-      platform: "gfg",
-      title: "GFG Weekly Challenge",
-      date: "Jan 27",
-      time: "6:30 PM",
-    },
-  ];
+  let contests = [];
+
+  async function loadContests() {
+    const res = await fetch("http://localhost:3000/api/contests");
+    contests = await res.json();
+
+    console.log("Contests loaded:", contests);
+    console.log("Count:", contests.length);
+
+    renderContests();
+  }
+
+  loadContests();
 
   // -------------------- Restore Saved State --------------------
   const savedPlatforms = JSON.parse(localStorage.getItem("platforms") || "[]");
@@ -83,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     disconnectUI();
   }
 
-  renderContests();   // initial render
+  renderContests(); // initial render
 
   // -------------------- Checkbox Change --------------------
   platformInputs.forEach((input) => {
@@ -120,6 +105,24 @@ document.addEventListener("DOMContentLoaded", () => {
     statusMsg.innerText = "Preferences saved successfully.";
   });
 
+//------------------For Farmating dd/mm/yyyy-------------------
+
+
+  function formatDate(timestamp) {
+    const d = new Date(timestamp);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  function formatTime(timestamp) {
+    const d = new Date(timestamp);
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  }
+
   // -------------------- Render Contests --------------------
   function renderContests() {
     contestList.innerHTML = "";
@@ -135,9 +138,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const filtered = contests.filter((contest) =>
-      selectedPlatforms.includes(contest.platform)
-    );
+    const filtered = contests
+      .filter((contest) =>
+        selectedPlatforms.includes(contest.platform.toLowerCase())
+      )
+      .sort((a, b) => a.startTime - b.startTime);
 
     if (filtered.length === 0) {
       contestList.innerHTML = `
@@ -151,8 +156,10 @@ document.addEventListener("DOMContentLoaded", () => {
       card.className = "contest-card";
 
       card.innerHTML = `
-        <div class="contest-title">${contest.title}</div>
-        <div class="contest-meta">${contest.date} • ${contest.time}</div>
+        <div class="contest-title">${contest.name}</div>
+        <div class="contest-meta">
+        ${formatDate(contest.startTime)} • ${formatTime(contest.startTime)}
+        </div>
 
         <div class="contest-footer">
           <span class="platform-badge">${contest.platform.toUpperCase()}</span>
@@ -188,5 +195,4 @@ document.addEventListener("DOMContentLoaded", () => {
     badge.classList.remove("badge-on");
     badge.classList.add("badge-off");
   }
-
 });
