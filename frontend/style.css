@@ -1,17 +1,20 @@
+/* ================= RESET ================= */
 * {
   box-sizing: border-box;
 }
 
+/* ================= BASE ================= */
 body {
   font-family: "Segoe UI", Arial, sans-serif;
-  background: linear-gradient(135deg, #eef2ff, #f9fafb);
+  background: #d4d4d4;
   margin: 0;
   padding: 20px;
+  color: #2b2b2b;
 }
 
 body.dark {
-  background: #0f172a;
-  color: #e5e7eb;
+  background: #2b2b2b;
+  color: #ffffff;
 }
 
 h1 {
@@ -19,8 +22,7 @@ h1 {
   margin-bottom: 30px;
 }
 
-/* ---------- Top Bar ---------- */
-
+/* ================= TOP BAR ================= */
 .top-bar {
   display: flex;
   align-items: center;
@@ -30,8 +32,7 @@ h1 {
   padding: 10px 0 20px;
 }
 
-/* ---------- Layout ---------- */
-
+/* ================= LAYOUT ================= */
 .container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -40,46 +41,88 @@ h1 {
   margin: auto;
 }
 
-/* ---------- Cards ---------- */
-
+/* ================= CARD ================= */
 .card {
-  background: white;
+  background: #ffffff;
   padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  height: 470px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
 
 body.dark .card {
-  background: #020617;
-  color: #e5e7eb;
+  background: #3a3a3a;
+  color: #ffffff;
 }
 
 .card h2 {
   margin-top: 0;
+  flex-shrink: 0;
 }
 
-/* ---------- Contest Cards ---------- */
+/* ================= UPCOMING SCROLL ================= */
+.card.upcoming {
+  display: flex;
+  flex-direction: column;
+}
 
+.card.upcoming .contest-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* Scrollbar */
+.card.upcoming .contest-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.card.upcoming .contest-list::-webkit-scrollbar-track {
+  background: #d4d4d4;
+  border-radius: 10px;
+}
+
+.card.upcoming .contest-list::-webkit-scrollbar-thumb {
+  background: #b3b3b3;
+  border-radius: 10px;
+}
+
+.card.upcoming .contest-list::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+body.dark .card.upcoming .contest-list::-webkit-scrollbar-track {
+  background: #444;
+}
+
+body.dark .card.upcoming .contest-list::-webkit-scrollbar-thumb {
+  background: #777;
+}
+
+/* ================= CONTEST CARDS ================= */
 .contest-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 12px;
+  gap: 18px;
 }
 
 .contest-card {
-  padding: 14px 16px;
+  background: #f5f5f5;
+  border: 1px solid #d4d4d4;
   border-radius: 10px;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
 body.dark .contest-card {
-  background: #020617;
-  border-color: #334155;
+  background: #2f2f2f;
+  border-color: #444;
 }
 
 .contest-title {
@@ -89,11 +132,11 @@ body.dark .contest-card {
 
 .contest-meta {
   font-size: 13px;
-  color: #6b7280;
+  color: #6b6b6b;
 }
 
 body.dark .contest-meta {
-  color: #9ca3af;
+  color: #b3b3b3;
 }
 
 .contest-footer {
@@ -105,33 +148,32 @@ body.dark .contest-meta {
 
 .platform-badge {
   font-size: 12px;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 999px;
+  background: #b3b3b3;
+  color: #2b2b2b;
   font-weight: 600;
-  background: #e0e7ff;
-  color: #3730a3;
 }
 
 body.dark .platform-badge {
-  background: #1e293b;
-  color: #93c5fd;
+  background: #555;
+  color: #ffffff;
 }
 
 .reminder-text {
   font-size: 12px;
-  color: #4b5563;
+  color: #666;
 }
 
 body.dark .reminder-text {
-  color: #9ca3af;
+  color: #aaa;
 }
 
-/* ---------- Forms ---------- */
-
+/* ================= FORMS ================= */
 label {
-  display: block;
   margin-top: 12px;
   font-weight: 600;
+  display: block;
 }
 
 input:not([type="checkbox"]),
@@ -140,70 +182,58 @@ select {
   padding: 10px;
   margin-top: 6px;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid #b3b3b3;
+  background: #ffffff;
 }
 
 body.dark input:not([type="checkbox"]),
 body.dark select {
-  background: #020617;
-  color: #e5e7eb;
-  border-color: #334155;
+  background: #2f2f2f;
+  color: #ffffff;
+  border-color: #555;
 }
 
-/* ---------- Google Button ---------- */
-
+/* ================= GOOGLE BUTTON ================= */
 .google-connect {
-  margin: 12px 0 18px;
+  margin: 8px 0 12px;
 }
 
 .google-btn {
   width: 100%;
-  height: 48px;
+  height: 40px;
   border-radius: 10px;
-  border: 1px solid #c7cbd1;
-  background: #f8fafc;
+  border: 1px solid #b3b3b3;
+  background: #f5f5f5;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   font-weight: 600;
   cursor: pointer;
-  color: #111827;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-}
-
-.google-btn i {
-  font-size: 20px;
+  color: #2b2b2b;
 }
 
 .google-btn:hover {
-  background: #eef2f7;
-}
-
-.google-status {
-  display: block;
-  margin-top: 6px;
-  font-size: 13px;
-  color: #6b7280;
+  background: #e5e5e5;
 }
 
 body.dark .google-btn {
-  background: #020617;
-  border-color: #334155;
-  color: #e5e7eb;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  background: #2f2f2f;
+  border-color: #555;
+  color: #ffffff;
 }
 
-body.dark .google-btn:hover {
-  filter: brightness(1.15);
+.google-status {
+  font-size: 13px;
+  margin-top: 6px;
+  color: #666;
 }
 
 body.dark .google-status {
-  color: #9ca3af;
+  color: #aaa;
 }
 
-/* ---------- Platforms Grid ---------- */
-
+/* ================= PLATFORM GRID ================= */
 .platforms {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -212,17 +242,13 @@ body.dark .google-status {
   margin-top: 12px;
 }
 
-/* ---------- Custom Checkbox ---------- */
-
+/* ================= CUSTOM CHECKBOX ================= */
 .check-container {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 14px;
-  font-weight: 500;
   cursor: pointer;
-  user-select: none;
-  margin: 0;
 }
 
 .check-container input {
@@ -232,12 +258,11 @@ body.dark .google-status {
 .check-container svg {
   width: 18px;
   height: 18px;
-  flex-shrink: 0;
 }
 
 .check-path {
   fill: none;
-  stroke: #4f46e5;
+  stroke: #2b2b2b;
   stroke-width: 5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -251,27 +276,17 @@ body.dark .google-status {
   stroke-dashoffset: -262.27;
 }
 
-.check-container span {
-  min-width: 130px;
-  display: inline-block;
-}
-
 body.dark .check-path {
-  stroke: #93c5fd;
+  stroke: #ffffff;
 }
 
-body.dark .check-container span {
-  color: #e5e7eb;
-}
-
-/* ---------- Main Button ---------- */
-
+/* ================= BUTTON ================= */
 button {
   margin-top: 20px;
   width: 100%;
   padding: 12px;
-  background: #4f46e5;
-  color: white;
+  background: #2b2b2b;
+  color: #ffffff;
   border: none;
   border-radius: 8px;
   font-weight: 600;
@@ -279,136 +294,101 @@ button {
 }
 
 button:hover {
-  background: #4338ca;
+  background: #444;
 }
 
-/* Disabled Create Reminder button */
 button:disabled {
-  opacity: 0.6;
+  background: #b3b3b3;
   cursor: not-allowed;
-  background: #9ca3af;
 }
 
-button:disabled:hover {
-  background: #9ca3af;
-}
-
-.status-msg {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #4b5563;
-}
-
-body.dark .status-msg {
-  color: #9ca3af;
-}
-
-/* Badge Layout */
-.google-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Badge Base */
+/* ================= BADGES ================= */
 .badge {
   font-size: 12px;
   padding: 4px 10px;
   border-radius: 999px;
   font-weight: 600;
-  white-space: nowrap;
 }
 
-/* Disconnected */
-.badge-off {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-/* Connected */
 .badge-on {
-  background: #dcfce7;
-  color: #166534;
+  background: #b3b3b3;
+  color: #2b2b2b;
 }
 
-/* Dark mode */
-body.dark .badge-off {
-  background: #3f1d1d;
-  color: #fca5a5;
+.badge-off {
+  background: #d4d4d4;
+  color: #555;
 }
 
 body.dark .badge-on {
-  background: #14532d;
-  color: #86efac;
+  background: #555;
+  color: #ffffff;
 }
 
-/* ---------- Dark Toggle ---------- */
+body.dark .badge-off {
+  background: #444;
+  color: #bbb;
+}
+
+/* ================= DARK TOGGLE ================= */
 
 .darkThemeBtn * {
-  transition: all 0.3s;
+  transition: all 0.25s ease;
 }
 
 .darkThemeBtn input {
-  width: 0;
-  height: 0;
-  visibility: hidden;
+  display: none;
 }
 
 .darkThemeBtn label {
-  border: 1px solid #d1d5db;
-  background: #e5e7eb;
-  border-radius: 10px;
-  height: 46px;
   width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  background: #b3b3b3;
+  border: 1px solid #999;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   position: relative;
   cursor: pointer;
 }
 
+/* Icons */
 .darkThemeBtn label i {
   position: absolute;
   font-size: 20px;
-  transition: 0.3s;
-  z-index: 1;
-  color: #000;
+  transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
+/* Default */
 .darkThemeBtn label i.sun {
   opacity: 0;
-  color: #fff;
+  transform: scale(0.6);
 }
 
 .darkThemeBtn label i.moon {
   opacity: 1;
+  transform: scale(1);
 }
 
+/* Checked */
 .darkThemeBtn input:checked + label {
-  background: #4a6cf7;
-  border-color: #4a6cf7;
+  background: #555;
+  border-color: #666;
 }
 
 .darkThemeBtn input:checked + label i.sun {
   opacity: 1;
+  transform: scale(1);
 }
 
 .darkThemeBtn input:checked + label i.moon {
   opacity: 0;
+  transform: scale(0.6);
 }
 
-/* ---------- List ---------- */
 
-ul {
-  padding-left: 18px;
-}
-
-li {
-  margin-bottom: 8px;
-}
-
-/* ---------- Responsive ---------- */
-
+/* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
   .container {
     grid-template-columns: 1fr;
