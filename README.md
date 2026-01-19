@@ -5,3 +5,4 @@ A lightweight web dashboard that aggregates upcoming competitive programming con
 ✨ Overview
 
 Contest Alert Dashboard brings multiple contest platforms into one place, helping users track upcoming events without switching between sites.
+This application will auto generate an alarm.
