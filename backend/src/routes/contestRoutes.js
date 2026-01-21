@@ -1,69 +1,83 @@
 const express = require("express");
 const router = express.Router();
 
-// --------------------------------------------------
-// Contest API Route (LeetCode + Codeforces)
-// --------------------------------------------------
+// dynamic import for node-fetch
+const fetch = (...args) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
+const CLIST_USER = process.env.CLIST_USER;
+const CLIST_KEY = process.env.CLIST_KEY;
+
+// -------------------- Contest API (CodeChef + AtCoder) --------------------
 router.get("/contests", async (req, res) => {
   try {
-    let leetcodeContests = [];
-    let codeforcesContests = [];
+    const url =
+      "https://clist.by/api/v4/contest/?upcoming=true&limit=50&format=json";
 
-    // -------------------- LeetCode --------------------
-    try {
-      const lcRes = await fetch(
-        "https://alfa-leetcode-api.onrender.com/contests/upcoming"
-      );
+    const response = await fetch(url, {
+      headers: {
+        // This format matches CLIST documentation
+        Authorization: `ApiKey ${CLIST_USER}:${CLIST_KEY}`,
+        Accept: "application/json",
+      },
+    });
 
-      const lcData = await lcRes.json();
-      const rawList = lcData.contests || [];
-
-      leetcodeContests = rawList.map((c) => ({
-        id: `leetcode-${c.titleSlug}`,
-        name: c.title,
-        platform: "LeetCode",
-        startTime: c.startTime * 1000, // seconds → ms
-        duration: Math.round(c.duration / 60), // seconds → minutes
-        url: `https://leetcode.com/contest/${c.titleSlug}/`,
-      }));
-    } catch (err) {
-      console.warn("LeetCode API unavailable, skipping.");
+    // If HTTP status is not OK, log body for debugging
+    if (!response.ok) {
+      const badText = await response.text();
+      console.error("CLIST HTTP error:", response.status, badText);
+      return res.status(500).json({ error: "CLIST request failed" });
     }
 
-    // -------------------- Codeforces --------------------
-    try {
-      const cfRes = await fetch("https://codeforces.com/api/contest.list");
+    const rawText = await response.text();
 
-      const cfData = await cfRes.json();
-
-      if (cfData.status === "OK") {
-        codeforcesContests = cfData.result
-          .filter((c) => c.phase === "BEFORE")
-          .map((c) => ({
-            id: `cf-${c.id}`,
-            name: c.name,
-            platform: "Codeforces",
-            startTime: c.startTimeSeconds * 1000, // seconds → ms
-            duration: Math.round(c.durationSeconds / 60),
-            url: `https://codeforces.com/contest/${c.id}`,
-          }));
-      }
-    } catch (err) {
-      console.warn("Codeforces API unavailable, skipping.");
+    if (!rawText) {
+      console.error("CLIST returned empty response");
+      return res.status(500).json({ error: "Empty response from CLIST" });
     }
 
-    // -------------------- Merge --------------------
-    const contests = [...leetcodeContests, ...codeforcesContests];
+    let data;
+    try {
+      data = JSON.parse(rawText);
+      console.log("Platforms from CLIST:", [
+        ...new Set(data.objects.map((c) => c.resource?.name).filter(Boolean)),
+      ]);
+    } catch (parseErr) {
+      console.error("CLIST parse error. Raw response:", rawText);
+      return res.status(500).json({ error: "Invalid JSON from CLIST" });
+    }
 
-    // Sort by upcoming time (earliest first)
-    contests.sort((a, b) => a.startTime - b.startTime);
+    if (!Array.isArray(data.objects)) {
+      console.error("Unexpected CLIST payload:", data);
+      return res.status(500).json({ error: "Unexpected CLIST payload" });
+    }
+
+    const allowedPlatforms = ["codechef", "atcoder"];
+
+    const contests = data.objects
+      .filter(
+        (c) =>
+          c.resource &&
+          c.resource.name &&
+          allowedPlatforms.includes(c.resource.name.toLowerCase()),
+      )
+
+      .map((c) => ({
+        id: `clist-${c.id}`,
+        name: c.event,
+        platform: c.resource.name,
+        startTime: new Date(c.start).getTime(),
+        endTime: new Date(c.end).getTime(),
+        duration: c.duration,
+        url: c.href,
+      }))
+      .sort((a, b) => a.startTime - b.startTime);
 
     res.json(contests);
   } catch (error) {
-    console.error("Contest API error:", error);
+    console.error("CLIST API runtime error:", error.message);
     res.status(500).json({
-      error: "Unable to fetch contest data",
+      error: "Failed to fetch contest data",
     });
   }
 });

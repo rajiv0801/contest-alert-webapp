@@ -36,8 +36,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let contests = [];
 
   async function loadContests() {
-    const res = await fetch("http://localhost:3000/api/contests");
-    contests = await res.json();
+    const result = await res.json();
+    if (!Array.isArray(result)) {
+      console.error("Invalid contest response:", result);
+      contests = [];
+      return;
+    }
+    contests = result;
 
     console.log("Contests loaded:", contests);
     console.log("Count:", contests.length);
@@ -105,8 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
     statusMsg.innerText = "Preferences saved successfully.";
   });
 
-//------------------For Farmating dd/mm/yyyy-------------------
-
+  //------------------For Farmating dd/mm/yyyy-------------------
 
   function formatDate(timestamp) {
     const d = new Date(timestamp);
@@ -140,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const filtered = contests
       .filter((contest) =>
-        selectedPlatforms.includes(contest.platform.toLowerCase())
+        selectedPlatforms.includes(contest.platform.toLowerCase()),
       )
       .sort((a, b) => a.startTime - b.startTime);
 

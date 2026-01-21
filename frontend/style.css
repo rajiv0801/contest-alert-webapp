@@ -270,7 +270,7 @@ body.dark .google-status {
   stroke-dasharray: 241 9999999;
   stroke-dashoffset: 0;
 }
-
+ 
 .check-container input:checked ~ svg .check-path {
   stroke-dasharray: 70.5 9999999;
   stroke-dashoffset: -262.27;
