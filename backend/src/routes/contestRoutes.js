@@ -8,21 +8,19 @@ const fetch = (...args) =>
 const CLIST_USER = process.env.CLIST_USER;
 const CLIST_KEY = process.env.CLIST_KEY;
 
-// -------------------- Contest API (CodeChef + AtCoder) --------------------
+// -------------------- Unified Contest API (All Platforms via CLIST) --------------------
 router.get("/contests", async (req, res) => {
   try {
     const url =
-      "https://clist.by/api/v4/contest/?upcoming=true&limit=50&format=json";
+      "https://clist.by/api/v4/contest/?upcoming=true&limit=100&format=json";
 
     const response = await fetch(url, {
       headers: {
-        // This format matches CLIST documentation
         Authorization: `ApiKey ${CLIST_USER}:${CLIST_KEY}`,
         Accept: "application/json",
       },
     });
 
-    // If HTTP status is not OK, log body for debugging
     if (!response.ok) {
       const badText = await response.text();
       console.error("CLIST HTTP error:", response.status, badText);
@@ -39,9 +37,6 @@ router.get("/contests", async (req, res) => {
     let data;
     try {
       data = JSON.parse(rawText);
-      console.log("Platforms from CLIST:", [
-        ...new Set(data.objects.map((c) => c.resource?.name).filter(Boolean)),
-      ]);
     } catch (parseErr) {
       console.error("CLIST parse error. Raw response:", rawText);
       return res.status(500).json({ error: "Invalid JSON from CLIST" });
@@ -52,20 +47,11 @@ router.get("/contests", async (req, res) => {
       return res.status(500).json({ error: "Unexpected CLIST payload" });
     }
 
-    const allowedPlatforms = ["codechef", "atcoder"];
-
     const contests = data.objects
-      .filter(
-        (c) =>
-          c.resource &&
-          c.resource.name &&
-          allowedPlatforms.includes(c.resource.name.toLowerCase()),
-      )
-
       .map((c) => ({
         id: `clist-${c.id}`,
         name: c.event,
-        platform: c.resource.name,
+        platform: c.resource?.name || c.host || "Unknown",
         startTime: new Date(c.start).getTime(),
         endTime: new Date(c.end).getTime(),
         duration: c.duration,

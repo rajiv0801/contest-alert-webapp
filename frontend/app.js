@@ -1,3 +1,16 @@
+//-------------------For mapping the platform names
+function normalizePlatform(raw) {
+  const p = raw.toLowerCase();
+
+  if (p.includes("codeforces")) return "codeforces";
+  if (p.includes("leetcode")) return "leetcode";
+  if (p.includes("atcoder")) return "atcoder";
+  if (p.includes("codechef")) return "codechef";
+  if (p.includes("kaggle")) return "kaggle";
+
+  return "other";
+}
+
 // -------------------- DARK MODE --------------------
 document.addEventListener("DOMContentLoaded", () => {
   const themeToggle = document.getElementById("darkmode-toggle");
@@ -36,19 +49,38 @@ document.addEventListener("DOMContentLoaded", () => {
   let contests = [];
 
   async function loadContests() {
-    const result = await res.json();
-    if (!Array.isArray(result)) {
-      console.error("Invalid contest response:", result);
-      contests = [];
-      return;
+    try {
+      const response = await fetch("http://localhost:5000/api/contests");
+      const contests = await response.json();
+
+      const container = document.getElementById("contest-list");
+      container.innerHTML = "";
+
+      contests.forEach((contest) => {
+        const card = document.createElement("div");
+        card.className = "contest-card";
+
+        const start = new Date(contest.startTime).toLocaleString();
+        const end = new Date(contest.endTime).toLocaleString();
+
+        card.innerHTML = `
+        <div class="contest-title">${contest.name}</div>
+        <div class="contest-platform">${contest.platform}</div>
+        <div class="contest-time">Start: ${start}</div>
+        <div class="contest-time">End: ${end}</div>
+        <a class="contest-link" href="${contest.url}" target="_blank">
+          Open Contest
+        </a>
+      `;
+
+        container.appendChild(card);
+      });
+    } catch (err) {
+      console.error("Failed to load contests:", err.message);
     }
-    contests = result;
-
-    console.log("Contests loaded:", contests);
-    console.log("Count:", contests.length);
-
-    renderContests();
   }
+
+  document.addEventListener("DOMContentLoaded", loadContests);
 
   loadContests();
 
@@ -143,9 +175,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const filtered = contests
-      .filter((contest) =>
-        selectedPlatforms.includes(contest.platform.toLowerCase()),
-      )
+      .filter((contest) => {
+        const normalized = normalizePlatform(contest.platform);
+        return selectedPlatforms.includes(normalized);
+      })
       .sort((a, b) => a.startTime - b.startTime);
 
     if (filtered.length === 0) {
