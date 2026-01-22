@@ -1,12 +1,12 @@
-//-------------------For mapping the platform names
+// ------------------- Platform Normalizer -------------------
 function normalizePlatform(raw) {
+  if (!raw) return "other";
   const p = raw.toLowerCase();
 
   if (p.includes("codeforces")) return "codeforces";
   if (p.includes("leetcode")) return "leetcode";
   if (p.includes("atcoder")) return "atcoder";
   if (p.includes("codechef")) return "codechef";
-  if (p.includes("kaggle")) return "kaggle";
 
   return "other";
 }
@@ -44,43 +44,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const contestList = document.getElementById("contestList");
 
   let isConnected = false;
-
-  // -------------------- Mock Contest Data --------------------
   let contests = [];
 
+  // -------------------- Load Contests --------------------
   async function loadContests() {
     try {
       const response = await fetch("http://localhost:5000/api/contests");
-      const contests = await response.json();
+      const data = await response.json();
 
-      const container = document.getElementById("contest-list");
-      container.innerHTML = "";
+      if (!Array.isArray(data)) {
+        console.error("Invalid contest payload:", data);
+        return;
+      }
 
-      contests.forEach((contest) => {
-        const card = document.createElement("div");
-        card.className = "contest-card";
-
-        const start = new Date(contest.startTime).toLocaleString();
-        const end = new Date(contest.endTime).toLocaleString();
-
-        card.innerHTML = `
-        <div class="contest-title">${contest.name}</div>
-        <div class="contest-platform">${contest.platform}</div>
-        <div class="contest-time">Start: ${start}</div>
-        <div class="contest-time">End: ${end}</div>
-        <a class="contest-link" href="${contest.url}" target="_blank">
-          Open Contest
-        </a>
-      `;
-
-        container.appendChild(card);
-      });
+      contests = data;
+      renderContests();
     } catch (err) {
       console.error("Failed to load contests:", err.message);
+      contestList.innerHTML = `<p class="empty-msg">Failed to load contests.</p>`;
     }
   }
-
-  document.addEventListener("DOMContentLoaded", loadContests);
 
   loadContests();
 
@@ -104,8 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     disconnectUI();
   }
-
-  renderContests(); // initial render
 
   // -------------------- Checkbox Change --------------------
   platformInputs.forEach((input) => {
@@ -142,21 +123,15 @@ document.addEventListener("DOMContentLoaded", () => {
     statusMsg.innerText = "Preferences saved successfully.";
   });
 
-  //------------------For Farmating dd/mm/yyyy-------------------
-
+  // -------------------- Formatting Helpers --------------------
   function formatDate(timestamp) {
     const d = new Date(timestamp);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
+    return d.toLocaleDateString();
   }
 
   function formatTime(timestamp) {
     const d = new Date(timestamp);
-    const hours = String(d.getHours()).padStart(2, "0");
-    const minutes = String(d.getMinutes()).padStart(2, "0");
-    return `${hours}:${minutes}`;
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   }
 
   // -------------------- Render Contests --------------------
@@ -168,9 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .map((i) => i.value);
 
     if (selectedPlatforms.length === 0) {
-      contestList.innerHTML = `
-        <p class="empty-msg">Select a platform to view contests.</p>
-      `;
+      contestList.innerHTML = `<p class="empty-msg">Select a platform to view contests.</p>`;
       return;
     }
 
@@ -182,9 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .sort((a, b) => a.startTime - b.startTime);
 
     if (filtered.length === 0) {
-      contestList.innerHTML = `
-        <p class="empty-msg">No contests available.</p>
-      `;
+      contestList.innerHTML = `<p class="empty-msg">No contests available.</p>`;
       return;
     }
 
@@ -195,12 +166,15 @@ document.addEventListener("DOMContentLoaded", () => {
       card.innerHTML = `
         <div class="contest-title">${contest.name}</div>
         <div class="contest-meta">
-        ${formatDate(contest.startTime)} • ${formatTime(contest.startTime)}
+          ${formatDate(contest.startTime)} • ${formatTime(contest.startTime)}
         </div>
-
         <div class="contest-footer">
-          <span class="platform-badge">${contest.platform.toUpperCase()}</span>
-          <span class="reminder-text">Reminder preview</span>
+          <span class="platform-badge">
+            ${normalizePlatform(contest.platform).toUpperCase()}
+          </span>
+          <a class="contest-link" href="${contest.url}" target="_blank">
+            Open
+          </a>
         </div>
       `;
 
@@ -211,8 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // -------------------- UI Helpers --------------------
   function connectUI() {
     isConnected = true;
-
-    userEmail.innerText = "Connected: ananya@gmail.com";
+    userEmail.innerText = "Connected: demo@gmail.com";
     googleBtn.innerHTML = `<i class="ri-refresh-line"></i><span>Switch Account</span>`;
     saveBtn.disabled = false;
 
@@ -223,7 +196,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function disconnectUI() {
     isConnected = false;
-
     userEmail.innerText = "Not connected";
     googleBtn.innerHTML = `<i class="ri-google-line"></i><span>Connect Google Account</span>`;
     saveBtn.disabled = true;
