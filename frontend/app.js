@@ -42,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const platformInputs = document.querySelectorAll(".check-container input");
   const alertSelect = document.getElementById("alertTime");
   const contestList = document.getElementById("contestList");
+  const loader = document.getElementById("loader");
 
   let isConnected = false;
   let contests = [];
@@ -49,11 +50,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // -------------------- Load Contests --------------------
   async function loadContests() {
     try {
+      loader.classList.remove("hidden");
+      contestList.innerHTML = "";
+
       const response = await fetch("http://localhost:5000/api/contests");
       const data = await response.json();
 
       if (!Array.isArray(data)) {
         console.error("Invalid contest payload:", data);
+        contestList.innerHTML = `<p class="empty-msg">Invalid data received.</p>`;
         return;
       }
 
@@ -62,6 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       console.error("Failed to load contests:", err.message);
       contestList.innerHTML = `<p class="empty-msg">Failed to load contests.</p>`;
+    } finally {
+      loader.classList.add("hidden");
     }
   }
 

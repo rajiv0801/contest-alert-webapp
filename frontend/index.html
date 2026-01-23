@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -10,14 +10,14 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"
       rel="stylesheet"
     />
- 
+
     <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
     <div class="top-bar">
       <h1>🏁 Contest Alert Dashboard</h1>
- 
+
       <div class="darkThemeBtn">
         <input id="darkmode-toggle" type="checkbox" />
         <label for="darkmode-toggle">
@@ -52,7 +52,7 @@
 
         <div class="platforms">
           <label class="check-container">
-            <input type="checkbox" value="leetcode" >
+            <input type="checkbox" value="leetcode" />
             <svg viewBox="0 0 64 64">
               <path
                 class="check-path"
@@ -97,7 +97,7 @@
           </label>
 
           <label class="check-container">
-            <input type="checkbox" value="atcoder"/>
+            <input type="checkbox" value="atcoder" />
             <svg viewBox="0 0 64 64">
               <path
                 class="check-path"
@@ -125,9 +125,12 @@
         <p id="statusMsg" class="status-msg"></p>
       </div>
 
-      
       <div class="card upcoming">
         <h2>📅 Upcoming Contests</h2>
+
+        <!-- Loader -->
+        <div id="loader" class="loader hidden">Loading contests...</div>
+
         <div id="contestList" class="contest-list"></div>
       </div>
     </div>

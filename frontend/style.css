@@ -266,11 +266,13 @@ body.dark .google-status {
   stroke-width: 5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: stroke-dasharray 0.4s ease, stroke-dashoffset 0.4s ease;
+  transition:
+    stroke-dasharray 0.4s ease,
+    stroke-dashoffset 0.4s ease;
   stroke-dasharray: 241 9999999;
   stroke-dashoffset: 0;
 }
- 
+
 .check-container input:checked ~ svg .check-path {
   stroke-dasharray: 70.5 9999999;
   stroke-dashoffset: -262.27;
@@ -330,6 +332,18 @@ body.dark .badge-off {
   color: #bbb;
 }
 
+/* =================== LOADER ===================== */
+
+.loader {
+  text-align: center;
+  padding: 16px;
+  font-weight: 600;
+}
+
+.hidden {
+  display: none;
+}
+
 /* ================= DARK TOGGLE ================= */
 
 .darkThemeBtn * {
@@ -357,7 +371,9 @@ body.dark .badge-off {
 .darkThemeBtn label i {
   position: absolute;
   font-size: 20px;
-  transition: transform 0.25s ease, opacity 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease;
 }
 
 /* Default */
@@ -386,7 +402,6 @@ body.dark .badge-off {
   opacity: 0;
   transform: scale(0.6);
 }
-
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
