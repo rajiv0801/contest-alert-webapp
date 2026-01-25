@@ -47,11 +47,18 @@ document.addEventListener("DOMContentLoaded", () => {
   let isConnected = false;
   let contests = [];
 
+  //-------------For Refreshing Contest List---------------
+
+  const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+  let refreshTimer = null;
+
   // -------------------- Load Contests --------------------
-  async function loadContests() {
+  async function loadContests(showLoader = true) {
     try {
-      loader.classList.remove("hidden");
-      contestList.innerHTML = "";
+      if (showLoader) {
+        loader.classList.remove("hidden");
+        contestList.innerHTML = "";
+      }
 
       const response = await fetch("http://localhost:5000/api/contests");
       const data = await response.json();
@@ -68,11 +75,18 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Failed to load contests:", err.message);
       contestList.innerHTML = `<p class="empty-msg">Failed to load contests.</p>`;
     } finally {
-      loader.classList.add("hidden");
+      if (showLoader) {
+        loader.classList.add("hidden");
+      }
     }
   }
 
   loadContests();
+
+  refreshTimer = setInterval(() => {
+    console.log("Auto refreshing contests...");
+    loadContests(false); // silent refresh
+  }, REFRESH_INTERVAL);
 
   // -------------------- Restore Saved State --------------------
   const savedPlatforms = JSON.parse(localStorage.getItem("platforms") || "[]");
