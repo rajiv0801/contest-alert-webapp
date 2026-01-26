@@ -47,9 +47,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const alertSelect = document.getElementById("alertTime");
   const contestList = document.getElementById("contestList");
   const loader = document.getElementById("loader");
+  const prevBtn = document.getElementById("prevPage");
+  const nextBtn = document.getElementById("nextPage");
+  const pageInfo = document.getElementById("pageInfo");
 
   let isConnected = false;
   let contests = [];
+
+  //-------------------- For Pagination -----------------------
+
+  let currentPage = 1;
+  const ITEMS_PER_PAGE = 6;
 
   //-------------For Refreshing Contest List---------------
 
@@ -115,7 +123,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // -------------------- Checkbox Change --------------------
   platformInputs.forEach((input) => {
-    input.addEventListener("change", renderContests);
+    input.addEventListener("change", () => {
+      currentPage = 1;
+      renderContests();
+    });
   });
 
   // -------------------- Google Button --------------------
@@ -184,28 +195,41 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    filtered.forEach((contest) => {
+    const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+
+    if (currentPage > totalPages) currentPage = totalPages || 1;
+
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    const pageItems = filtered.slice(start, end);
+
+    pageItems.forEach((contest) => {
       const card = document.createElement("div");
       card.className = "contest-card";
 
       card.innerHTML = `
-        <div class="contest-title">${contest.name}</div>
-        <div class="contest-meta">
-          ${formatDate(contest.startTime)} • ${formatTime(contest.startTime)}
-        </div>
-        <div class="contest-footer">
-          <span class="platform-badge ${getPlatformBadgeClass(contest.platform)}">
-            ${normalizePlatform(contest.platform).toUpperCase()}
-          </span>
-
-          <a class="contest-link" href="${contest.url}" target="_blank">
-            Open
-          </a>
-        </div>
-      `;
+    <div class="contest-title">${contest.name}</div>
+    <div class="contest-meta">
+      ${formatDate(contest.startTime)} • ${formatTime(contest.startTime)}
+    </div>
+    <div class="contest-footer">
+      <span class="platform-badge ${getPlatformBadgeClass(contest.platform)}">
+        ${normalizePlatform(contest.platform).toUpperCase()}
+      </span>
+      <a class="contest-link" href="${contest.url}" target="_blank">Open</a>
+    </div>
+  `;
 
       contestList.appendChild(card);
     });
+
+    // Update pagination UI
+    pageInfo.innerText = `Page ${currentPage} of ${totalPages || 1}`;
+    prevBtn.classList.toggle("disabled", currentPage === 1);
+    nextBtn.classList.toggle(
+      "disabled",
+      currentPage === totalPages || totalPages === 0,
+    );
   }
 
   // -------------------- UI Helpers --------------------
@@ -230,4 +254,19 @@ document.addEventListener("DOMContentLoaded", () => {
     badge.classList.remove("badge-on");
     badge.classList.add("badge-off");
   }
+  
+  //------------------ For Pagination----------------
+  
+  prevBtn.addEventListener("click", () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderContests();
+    }
+  });
+
+  nextBtn.addEventListener("click", () => {
+    currentPage++;
+    renderContests();
+  });
+  
 });

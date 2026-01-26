@@ -386,6 +386,33 @@ body.dark .badge-off {
 }
 
 
+/* Pagination Icons */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.page-icon {
+  font-size: 24px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.page-icon:hover {
+  transform: scale(1.15);
+}
+
+.page-icon.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+
 
 
 /* ================= DARK TOGGLE ================= */
