@@ -11,6 +11,10 @@ function normalizePlatform(raw) {
   return "other";
 }
 
+function getPlatformBadgeClass(raw) {
+  return `badge-${normalizePlatform(raw)}`;
+}
+
 // -------------------- DARK MODE --------------------
 document.addEventListener("DOMContentLoaded", () => {
   const themeToggle = document.getElementById("darkmode-toggle");
@@ -190,9 +194,10 @@ document.addEventListener("DOMContentLoaded", () => {
           ${formatDate(contest.startTime)} • ${formatTime(contest.startTime)}
         </div>
         <div class="contest-footer">
-          <span class="platform-badge">
+          <span class="platform-badge ${getPlatformBadgeClass(contest.platform)}">
             ${normalizePlatform(contest.platform).toUpperCase()}
           </span>
+
           <a class="contest-link" href="${contest.url}" target="_blank">
             Open
           </a>
