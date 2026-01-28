@@ -26,6 +26,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const googleBtn = document.getElementById("loginBtn"); // ✅ fixed id
 
+    // -------------------- DARK MODE --------------------
+  const themeToggle = document.getElementById("darkmode-toggle");
+
+  if (themeToggle) {
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark");
+      themeToggle.checked = true;
+    }
+
+    themeToggle.addEventListener("change", () => {
+      if (themeToggle.checked) {
+        document.body.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        document.body.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+    });
+  }
+
+
   // -------------------- Google Login --------------------
   if (googleBtn) {
     googleBtn.addEventListener("click", (e) => {
