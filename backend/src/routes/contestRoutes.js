@@ -1,4 +1,4 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
 // dynamic import for node-fetch
@@ -68,4 +68,5 @@ router.get("/contests", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
+

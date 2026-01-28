@@ -1,6 +1,11 @@
+import dotenv from "dotenv";
+dotenv.config({ path: "D:/Coding/contest-alert-app/backend/.env" });
 
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+
+// Debug (temporary)
+console.log("PASSPORT ENV CHECK:", process.env.GOOGLE_CLIENT_ID);
 
 passport.use(
   new GoogleStrategy(

@@ -9,21 +9,22 @@ router.get(
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-// Callback
+// Callback after Google login
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "/login",
+    failureRedirect: "http://127.0.0.1:5500/frontend/index.html",
   }),
   (req, res) => {
-    res.redirect("http://localhost:3000/dashboard");
+    // Redirect to your frontend
+    res.redirect("http://127.0.0.1:5500/frontend/index.html");
   }
 );
 
 // Logout
 router.get("/logout", (req, res) => {
   req.logout(() => {
-    res.redirect("http://localhost:3000");
+    res.redirect("http://127.0.0.1:5500/frontend/index.html");
   });
 });
 

@@ -305,31 +305,14 @@ button:disabled {
 }
 
 /* ================= BADGES ================= */
-.badge {
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-weight: 600;
-}
-
 .badge-on {
-  background: #b3b3b3;
-  color: #2b2b2b;
+  background-color: #22c55e;
+  color: white;
 }
 
 .badge-off {
-  background: #d4d4d4;
-  color: #555;
-}
-
-body.dark .badge-on {
-  background: #555;
-  color: #ffffff;
-}
-
-body.dark .badge-off {
-  background: #444;
-  color: #bbb;
+  background-color: #ef4444;
+  color: white;
 }
 
 /* =================== LOADER ===================== */

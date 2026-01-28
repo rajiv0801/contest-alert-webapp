@@ -15,113 +15,81 @@ function getPlatformBadgeClass(raw) {
   return `badge-${normalizePlatform(raw)}`;
 }
 
-// -------------------- DARK MODE --------------------
-document.addEventListener("DOMContentLoaded", () => {
-  const themeToggle = document.getElementById("darkmode-toggle");
-  const savedTheme = localStorage.getItem("theme");
-
-  if (savedTheme === "dark") {
-    document.body.classList.add("dark");
-    themeToggle.checked = true;
-  }
-
-  themeToggle.addEventListener("change", () => {
-    if (themeToggle.checked) {
-      document.body.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.body.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  });
-});
-
 // -------------------- MAIN APP --------------------
 document.addEventListener("DOMContentLoaded", () => {
-  const googleBtn = document.getElementById("googleLoginBtn");
-  const userEmail = document.getElementById("userEmail");
-  const badge = document.getElementById("connectionBadge");
-  const saveBtn = document.getElementById("saveBtn");
-  const statusMsg = document.getElementById("statusMsg");
   const platformInputs = document.querySelectorAll(".check-container input");
-  const alertSelect = document.getElementById("alertTime");
   const contestList = document.getElementById("contestList");
   const loader = document.getElementById("loader");
   const prevBtn = document.getElementById("prevPage");
   const nextBtn = document.getElementById("nextPage");
   const pageInfo = document.getElementById("pageInfo");
 
-  let isConnected = false;
+  const googleBtn = document.getElementById("loginBtn"); // ✅ fixed id
+
+  // -------------------- Google Login --------------------
+  if (googleBtn) {
+    googleBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = "http://localhost:5000/auth/google";
+    });
+  }
+
   let contests = [];
-
-  //-------------------- For Pagination -----------------------
-
   let currentPage = 1;
   const ITEMS_PER_PAGE = 6;
 
-  //-------------For Refreshing Contest List---------------
+  // -------------------- Load User Status --------------------
+  function loadUserStatus() {
+    fetch("http://localhost:5000/api/users/me", {
+      credentials: "include",
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data || !data.loggedIn) return;
 
-  const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
-  let refreshTimer = null;
+        const loginBtn = document.getElementById("loginBtn");
+        const badge = document.getElementById("connectionBadge");
+        const email = document.getElementById("userEmail");
 
-  // -------------------- Load Contests --------------------
-  async function loadContests(showLoader = true) {
-    try {
-      if (showLoader) {
-        loader.classList.remove("hidden");
-        contestList.innerHTML = "";
-      }
+        if (loginBtn) loginBtn.style.display = "none";
 
-      const response = await fetch("http://localhost:5000/api/contests");
-      const data = await response.json();
+        if (badge) {
+          badge.innerText = "Connected";
+          badge.classList.remove("badge-off");
+          badge.classList.add("badge-on");
+        }
 
-      if (!Array.isArray(data)) {
-        console.error("Invalid contest payload:", data);
-        contestList.innerHTML = `<p class="empty-msg">Invalid data received.</p>`;
-        return;
-      }
-
-      contests = data;
-      renderContests();
-    } catch (err) {
-      console.error("Failed to load contests:", err.message);
-      contestList.innerHTML = `<p class="empty-msg">Failed to load contests.</p>`;
-    } finally {
-      if (showLoader) {
-        loader.classList.add("hidden");
-      }
-    }
+        if (email) {
+          email.innerText = data.user.email;
+        }
+      })
+      .catch((err) => console.warn("User status skipped:", err));
   }
 
+  // -------------------- Fetch Contests --------------------
+  function loadContests() {
+    loader.style.display = "block";
+
+    fetch("http://localhost:5000/api/contests")
+      .then((res) => res.json())
+      .then((data) => {
+        contests = data || [];
+        currentPage = 1;
+        renderContests();
+      })
+      .catch((err) => {
+        console.error("Contest fetch failed:", err);
+        contestList.innerHTML = `<p class="empty-msg">Failed to load contests.</p>`;
+      })
+      .finally(() => {
+        loader.style.display = "none";
+      });
+  }
+
+  loadUserStatus();
   loadContests();
 
-  refreshTimer = setInterval(() => {
-    console.log("Auto refreshing contests...");
-    loadContests(false); // silent refresh
-  }, REFRESH_INTERVAL);
-
-  // -------------------- Restore Saved State --------------------
-  const savedPlatforms = JSON.parse(localStorage.getItem("platforms") || "[]");
-  const savedAlert = localStorage.getItem("alertTime");
-  const savedConnection = localStorage.getItem("connected");
-
-  platformInputs.forEach((input) => {
-    if (savedPlatforms.includes(input.value)) {
-      input.checked = true;
-    }
-  });
-
-  if (savedAlert) {
-    alertSelect.value = savedAlert;
-  }
-
-  if (savedConnection === "true") {
-    connectUI();
-  } else {
-    disconnectUI();
-  }
-
-  // -------------------- Checkbox Change --------------------
+  // -------------------- Checkbox Filter --------------------
   platformInputs.forEach((input) => {
     input.addEventListener("change", () => {
       currentPage = 1;
@@ -129,134 +97,78 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // -------------------- Google Button --------------------
-  googleBtn.addEventListener("click", () => {
-    if (!isConnected) {
-      localStorage.setItem("connected", "true");
-      connectUI();
-      statusMsg.innerText = "Account connected successfully.";
-    } else {
-      localStorage.removeItem("connected");
-      disconnectUI();
-      statusMsg.innerText = "Account disconnected.";
-    }
-  });
-
-  // -------------------- Save Preferences --------------------
-  saveBtn.addEventListener("click", () => {
-    const selectedPlatforms = Array.from(platformInputs)
+  // -------------------- Helpers --------------------
+  function getSelectedPlatforms() {
+    return Array.from(platformInputs)
       .filter((i) => i.checked)
-      .map((i) => i.value);
-
-    if (selectedPlatforms.length === 0) {
-      statusMsg.innerText = "Please select at least one platform.";
-      return;
-    }
-
-    localStorage.setItem("platforms", JSON.stringify(selectedPlatforms));
-    localStorage.setItem("alertTime", alertSelect.value);
-
-    statusMsg.innerText = "Preferences saved successfully.";
-  });
-
-  // -------------------- Formatting Helpers --------------------
-  function formatDate(timestamp) {
-    const d = new Date(timestamp);
-    return d.toLocaleDateString();
+      .map((i) => i.value.toLowerCase().trim());
   }
 
-  function formatTime(timestamp) {
-    const d = new Date(timestamp);
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  function formatDate(ts) {
+    return new Date(ts).toLocaleDateString();
   }
 
-  // -------------------- Render Contests --------------------
+  function formatTime(ts) {
+    return new Date(ts).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  // -------------------- Render --------------------
   function renderContests() {
     contestList.innerHTML = "";
 
-    const selectedPlatforms = Array.from(platformInputs)
-      .filter((i) => i.checked)
-      .map((i) => i.value);
+    const selectedPlatforms = getSelectedPlatforms();
 
     if (selectedPlatforms.length === 0) {
-      contestList.innerHTML = `<p class="empty-msg">Select a platform to view contests.</p>`;
+      pageInfo.innerText = "";
+      contestList.innerHTML = `<p class="empty-msg">Select at least one platform.</p>`;
       return;
     }
 
     const filtered = contests
-      .filter((contest) => {
-        const normalized = normalizePlatform(contest.platform);
-        return selectedPlatforms.includes(normalized);
-      })
+      .filter((c) => selectedPlatforms.includes(normalizePlatform(c.platform)))
       .sort((a, b) => a.startTime - b.startTime);
 
     if (filtered.length === 0) {
+      pageInfo.innerText = "";
       contestList.innerHTML = `<p class="empty-msg">No contests available.</p>`;
       return;
     }
 
     const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-
-    if (currentPage > totalPages) currentPage = totalPages || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
 
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
-    const pageItems = filtered.slice(start, end);
+    const pageItems = filtered.slice(start, start + ITEMS_PER_PAGE);
 
     pageItems.forEach((contest) => {
       const card = document.createElement("div");
       card.className = "contest-card";
 
       card.innerHTML = `
-    <div class="contest-title">${contest.name}</div>
-    <div class="contest-meta">
-      ${formatDate(contest.startTime)} • ${formatTime(contest.startTime)}
-    </div>
-    <div class="contest-footer">
-      <span class="platform-badge ${getPlatformBadgeClass(contest.platform)}">
-        ${normalizePlatform(contest.platform).toUpperCase()}
-      </span>
-      <a class="contest-link" href="${contest.url}" target="_blank">Open</a>
-    </div>
-  `;
+        <div class="contest-title">${contest.name}</div>
+        <div class="contest-meta">
+          ${formatDate(contest.startTime)} • ${formatTime(contest.startTime)}
+        </div>
+        <div class="contest-footer">
+          <span class="platform-badge ${getPlatformBadgeClass(contest.platform)}">
+            ${normalizePlatform(contest.platform).toUpperCase()}
+          </span>
+          <a class="contest-link" href="${contest.url}" target="_blank">Open</a>
+        </div>
+      `;
 
       contestList.appendChild(card);
     });
 
-    // Update pagination UI
-    pageInfo.innerText = `Page ${currentPage} of ${totalPages || 1}`;
-    prevBtn.classList.toggle("disabled", currentPage === 1);
-    nextBtn.classList.toggle(
-      "disabled",
-      currentPage === totalPages || totalPages === 0,
-    );
+    pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages;
   }
 
-  // -------------------- UI Helpers --------------------
-  function connectUI() {
-    isConnected = true;
-    userEmail.innerText = "Connected: demo@gmail.com";
-    googleBtn.innerHTML = `<i class="ri-refresh-line"></i><span>Switch Account</span>`;
-    saveBtn.disabled = false;
-
-    badge.innerText = "Connected";
-    badge.classList.remove("badge-off");
-    badge.classList.add("badge-on");
-  }
-
-  function disconnectUI() {
-    isConnected = false;
-    userEmail.innerText = "Not connected";
-    googleBtn.innerHTML = `<i class="ri-google-line"></i><span>Connect Google Account</span>`;
-    saveBtn.disabled = true;
-
-    badge.innerText = "Not Connected";
-    badge.classList.remove("badge-on");
-    badge.classList.add("badge-off");
-  }
-  
-  //------------------ For Pagination----------------
-  
+  // -------------------- Pagination --------------------
   prevBtn.addEventListener("click", () => {
     if (currentPage > 1) {
       currentPage--;
@@ -268,5 +180,4 @@ document.addEventListener("DOMContentLoaded", () => {
     currentPage++;
     renderContests();
   });
-  
 });
