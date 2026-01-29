@@ -12,33 +12,34 @@ import contestRoutes from "./src/routes/contestRoutes.js";
 
 import userRoutes from "./src/routes/userRoutes.js";
 
-
-
-
 const app = express();
 
 app.use(cors({
-    origin: [
-      "http://127.0.0.1:5500",
-      "http://localhost:5500"
-    ],
-    credentials: true                 // allow cookies
-  }));
+  origin: "http://localhost:5500",
+  credentials: true
+}));
 app.use(express.json());
 
 // Session
 app.use(
   session({
+    name: "contest.sid",
     secret: "contest-secret",
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,   // required for localhost
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    },
   })
 );
+
 
 // Passport
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 app.use("/api/users", userRoutes);
 

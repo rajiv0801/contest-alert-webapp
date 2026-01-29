@@ -44,12 +44,24 @@
             </a>
 
             <!-- Connection Badge -->
-            <!-- <span id="connectionBadge" class="badge badge-off">
+            <span id="connectionBadge" class="badge badge-off">
               Not Connected
-            </span> -->
+            </span>
           </div>
 
-          <span id="userEmail" class="google-status">Not connected</span>
+          <!-- User Info -->
+          <div id="userInfo" class="google-user hidden">
+            <img id="userAvatar" />
+            <div class="user-text">
+              <div class="connected-label">Connected as</div>
+              <div id="userName"></div>
+              <div id="userEmail" class="google-status"></div>
+            </div>
+
+            <button id="logoutBtn">Logout</button>
+          </div>
+
+          <span id="guestText" class="google-status">Not connected</span>
         </div>
 
         <label>Select Platforms</label>

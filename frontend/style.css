@@ -304,6 +304,32 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* ----------User Detail------------- */
+
+.google-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.google-user img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.google-user .user-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+}
+
+.hidden {
+  display: none;
+}
+
+
 /* ================= BADGES ================= */
 .badge-on {
   background-color: #22c55e;

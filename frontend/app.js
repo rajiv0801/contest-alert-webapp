@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const googleBtn = document.getElementById("loginBtn"); // ✅ fixed id
 
-    // -------------------- DARK MODE --------------------
+  // -------------------- DARK MODE --------------------
   const themeToggle = document.getElementById("darkmode-toggle");
 
   if (themeToggle) {
@@ -48,18 +48,41 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-
   // -------------------- Google Login --------------------
   if (googleBtn) {
     googleBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      window.location.href = "http://localhost:5000/auth/google";
+      const ok = confirm("You will be redirected to select a Google account.");
+      if (ok) {
+        window.location.href = "http://localhost:5000/auth/google";
+      }
     });
   }
 
   let contests = [];
   let currentPage = 1;
   const ITEMS_PER_PAGE = 6;
+
+  //---------------- For logout logic-----------------------
+
+  function resetUserUI() {
+    const loginBtn = document.getElementById("loginBtn");
+    if (loginBtn) loginBtn.style.display = "flex";
+
+    const badge = document.getElementById("connectionBadge");
+    if (badge) {
+      badge.innerText = "Not Connected";
+      badge.classList.remove("badge-on");
+      badge.classList.add("badge-off");
+    }
+
+    document.getElementById("guestText")?.classList.remove("hidden");
+    document.getElementById("userInfo")?.classList.add("hidden");
+
+    document.getElementById("userAvatar").src = "";
+    document.getElementById("userName").innerText = "";
+    document.getElementById("userEmail").innerText = "";
+  }
 
   // -------------------- Load User Status --------------------
   function loadUserStatus() {
@@ -68,25 +91,45 @@ document.addEventListener("DOMContentLoaded", () => {
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (!data || !data.loggedIn) return;
+        if (!data || !data.loggedIn) {
+          resetUserUI();
+          return;
+        }
 
+        // Hide connect button
         const loginBtn = document.getElementById("loginBtn");
-        const badge = document.getElementById("connectionBadge");
-        const email = document.getElementById("userEmail");
-
         if (loginBtn) loginBtn.style.display = "none";
 
+        // Badge
+        const badge = document.getElementById("connectionBadge");
         if (badge) {
           badge.innerText = "Connected";
           badge.classList.remove("badge-off");
           badge.classList.add("badge-on");
         }
 
-        if (email) {
-          email.innerText = data.user.email;
+        // User info
+        document.getElementById("guestText")?.classList.add("hidden");
+        document.getElementById("userInfo")?.classList.remove("hidden");
+
+        document.getElementById("userAvatar").src = data.user.photo;
+        document.getElementById("userName").innerText = data.user.name;
+        document.getElementById("userEmail").innerText = data.user.email;
+
+        // Logout
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+          logoutBtn.onclick = () => {
+            fetch("http://localhost:5000/auth/logout", {
+              credentials: "include",
+            }).finally(() => {
+              resetUserUI();
+              window.location.reload();
+            });
+          };
         }
       })
-      .catch((err) => console.warn("User status skipped:", err));
+      .catch(() => {});
   }
 
   // -------------------- Fetch Contests --------------------
