@@ -15,10 +15,7 @@ import userRoutes from "./src/routes/userRoutes.js";
 const app = express();
 
 app.use(cors({
-  origin: [
-      "http://localhost:5500",
-      "http://127.0.0.1:5500"
-    ],
+  origin: "http://localhost:5500",
   credentials: true
 }));
 app.use(express.json());
@@ -32,7 +29,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: "none",
       secure: false,   // required for localhost
       maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
