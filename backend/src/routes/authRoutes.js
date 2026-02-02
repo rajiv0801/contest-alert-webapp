@@ -6,25 +6,39 @@ const router = express.Router();
 // Start Google login
 router.get(
   "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    prompt: "select_account",
+  }),
 );
 
 // Callback after Google login
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://127.0.0.1:5500/frontend/index.html",
+    failureRedirect: "http://localhost:5500/frontend/index.html",
   }),
   (req, res) => {
     // Redirect to your frontend
-    res.redirect("http://127.0.0.1:5500/frontend/index.html");
-  }
+    res.redirect("http://localhost:5500/frontend/index.html");
+  },
 );
 
 // Logout
 router.get("/logout", (req, res) => {
-  req.logout(() => {
-    res.redirect("http://127.0.0.1:5500/frontend/index.html");
+  req.logout((err) => {
+    if (err) {
+      return res.redirect("http://localhost:5500/frontend/index.html");
+    }
+
+    if (req.session) {
+      req.session.destroy(() => {
+        res.clearCookie("contest.sid");
+        return res.redirect("http://localhost:5500/frontend/index.html");
+      });
+    } else {
+      return res.redirect("http://localhost:5500/frontend/index.html");
+    }
   });
 });
 
