@@ -53,14 +53,15 @@ document.addEventListener("DOMContentLoaded", () => {
     googleBtn.addEventListener("click", (e) => {
       e.preventDefault();
 
-      const ok = confirm("You will be redirected to select a Google account.");
-      if (ok) {
-        googleBtn.innerText = "Redirecting...";
-        googleBtn.style.opacity = "0.7";
-        googleBtn.style.pointerEvents = "none";
+      // const ok = confirm("You will be redirected to select a Google account.");
+      // if (!ok) return;
 
-        window.location.href = "http://localhost:5000/auth/google";
-      }
+      // Silence network errors during OAuth redirect
+      window.addEventListener("beforeunload", () => {
+        window.onerror = () => true;
+      });
+
+      window.location.href = "http://localhost:5000/auth/google";
     });
   }
 
