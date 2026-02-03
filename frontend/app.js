@@ -130,9 +130,21 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("guestText")?.classList.add("hidden");
         document.getElementById("userInfo")?.classList.remove("hidden");
 
-        document.getElementById("userAvatar").src = data.user.photo;
-        document.getElementById("userName").innerText = data.user.name;
-        document.getElementById("userEmail").innerText = data.user.email;
+        // ----- USER INFO SAFE BINDING -----
+        const avatarEl = document.getElementById("userAvatar");
+        const nameEl = document.getElementById("userName");
+        const emailEl = document.getElementById("userEmail");
+
+        if (avatarEl) {
+          avatarEl.src = data.user.photo || data.user.picture || "";
+          avatarEl.onerror = () => {
+            avatarEl.src = "/default-avatar.png";
+          };
+        }
+
+        if (nameEl) nameEl.innerText = data.user.name || "";
+        if (emailEl) emailEl.innerText = data.user.email || "";
+        // -----------------------------------
 
         // Enable reminder button when logged in
         const reminderBtn = document.getElementById("saveBtn");
