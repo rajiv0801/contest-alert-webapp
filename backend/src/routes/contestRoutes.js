@@ -8,74 +8,60 @@ const fetch = (...args) =>
 const CLIST_USER = process.env.CLIST_USER;
 const CLIST_KEY = process.env.CLIST_KEY;
 
-const SUPPORTED_PLATFORMS = [
-  "leetcode",
-  "codeforces",
-  "codechef",
-  "atcoder"
-];
-
 // -------------------- Unified Contest API --------------------
 router.get("/contests", async (req, res) => {
   try {
-    const url =
-      "https://clist.by/api/v4/contest/?upcoming=true&format=json";
 
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `ApiKey ${CLIST_USER}:${CLIST_KEY}`,
-        Accept: "application/json",
-      },
-    });
+    // 1. Main request (all contests)
+    const mainUrl =
+      "https://clist.by/api/v4/contest/?upcoming=true&limit=100&format=json";
 
-    if (!response.ok) {
-      const badText = await response.text();
-      console.error("CLIST HTTP error:", response.status, badText);
-      return res.status(500).json({ error: "CLIST request failed" });
-    }
+    // 2. Separate LeetCode request to avoid pagination loss
+    const lcUrl =
+      "https://clist.by/api/v4/contest/?upcoming=true&resource__regex=leetcode&limit=20&format=json";
 
-    const rawText = await response.text();
+    const headers = {
+      Authorization: `ApiKey ${CLIST_USER}:${CLIST_KEY}`,
+      Accept: "application/json",
+    };
 
-    if (!rawText) {
-      console.error("CLIST returned empty response");
-      return res.status(500).json({ error: "Empty response from CLIST" });
-    }
+    const [mainRes, lcRes] = await Promise.all([
+      fetch(mainUrl, { headers }),
+      fetch(lcUrl, { headers }),
+    ]);
 
-    let data;
-    try {
-      data = JSON.parse(rawText);
-    } catch (parseErr) {
-      console.error("CLIST parse error. Raw response:", rawText);
-      return res.status(500).json({ error: "Invalid JSON from CLIST" });
-    }
+    const mainData = await mainRes.json();
+    const lcData = await lcRes.json();
 
-    if (!Array.isArray(data.objects)) {
-      console.error("Unexpected CLIST payload:", data);
-      return res.status(500).json({ error: "Unexpected CLIST payload" });
-    }
+    // Merge both results
+    const raw = [
+      ...(mainData.objects || []),
+      ...(lcData.objects || []),
+    ];
 
-    const contests = data.objects
-      .map((c) => ({
-        id: `clist-${c.id}`,
-        name: c.event,
+    const contests = raw
+      .map((c) => {
 
-        platform: (() => {
-          const link = String(c.href || "").toLowerCase();
+        // Detect platform from URL (most reliable)
+        const link = String(c.href || "").toLowerCase();
 
-          if (link.includes("leetcode")) return "leetcode";
-          if (link.includes("codeforces")) return "codeforces";
-          if (link.includes("codechef")) return "codechef";
-          if (link.includes("atcoder")) return "atcoder";
+        let platform = "unknown";
 
-          return "unknown";
-        })(),
+        if (link.includes("leetcode")) platform = "leetcode";
+        else if (link.includes("codeforces")) platform = "codeforces";
+        else if (link.includes("codechef")) platform = "codechef";
+        else if (link.includes("atcoder")) platform = "atcoder";
 
-        startTime: new Date(c.start).getTime(),
-        endTime: new Date(c.end).getTime(),
-        duration: c.duration,
-        url: c.href,
-      }))
-      .filter(c => SUPPORTED_PLATFORMS.includes(c.platform))
+        return {
+          id: `clist-${c.id}`,
+          name: c.event,
+          platform: platform,
+          startTime: new Date(c.start).getTime(),
+          endTime: new Date(c.end).getTime(),
+          duration: c.duration,
+          url: c.href,
+        };
+      })
       .sort((a, b) => a.startTime - b.startTime);
 
     res.json(contests);
@@ -92,7 +78,7 @@ router.get("/contests", async (req, res) => {
 router.get("/proof/lc", async (req, res) => {
   try {
     const url =
-      "https://clist.by/api/v4/contest/?upcoming=true&limit=200&format=json";
+      "https://clist.by/api/v4/contest/?upcoming=true&resource__regex=leetcode&limit=20&format=json";
 
     const response = await fetch(url, {
       headers: {
@@ -105,17 +91,10 @@ router.get("/proof/lc", async (req, res) => {
 
     const raw = data.objects || [];
 
-    const leetItems = raw.filter((c) => {
-      const link = String(c.href || "").toLowerCase();
-      return link.includes("leetcode");
-    });
-
     res.json({
-      totalFromClist: raw.length,
+      totalFromLeetRequest: raw.length,
 
-      leetCount: leetItems.length,
-
-      samples: leetItems.slice(0, 3).map((c) => ({
+      samples: raw.slice(0, 3).map((c) => ({
         event: c.event,
         href: c.href,
         start: c.start,
