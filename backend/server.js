@@ -9,8 +9,10 @@ import "./config/passport.js";
 // Routes
 import authRoutes from "./src/routes/authRoutes.js";
 import contestRoutes from "./src/routes/contestRoutes.js";
-
 import userRoutes from "./src/routes/userRoutes.js";
+import reminderRoutes from "./src/routes/reminder.route.js";
+
+
 
 const app = express();
 
@@ -46,6 +48,18 @@ app.use("/api/users", userRoutes);
 // Routes
 app.use("/auth", authRoutes);
 app.use("/api", contestRoutes);
+
+const requireAuth = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "not logged in" });
+  }
+  next();
+};
+
+app.use("/api/reminders", requireAuth, reminderRoutes);
+
+
+
 
 // Server start
 const PORT = 5000;
