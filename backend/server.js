@@ -3,26 +3,28 @@ import cors from "cors";
 import session from "express-session";
 import passport from "passport";
 
-// Load passport config
 import "./config/passport.js";
 
-// Routes
 import authRoutes from "./src/routes/authRoutes.js";
 import contestRoutes from "./src/routes/contestRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import reminderRoutes from "./src/routes/reminder.route.js";
 
+import connectDB from "./db.js";
 
+connectDB();
 
 const app = express();
 
-app.use(cors({
-  origin: "http://localhost:5500",
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5500",
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
-// Session
 app.use(
   session({
     name: "contest.sid",
@@ -32,36 +34,20 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: false,   // required for localhost
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      secure: false,
+      maxAge: 1000 * 60 * 60 * 24,
     },
   })
 );
 
-
-// Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/api/users", userRoutes);
-
-// Routes
 app.use("/auth", authRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api", contestRoutes);
+app.use("/api/reminders", reminderRoutes);
 
-const requireAuth = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: "not logged in" });
-  }
-  next();
-};
-
-app.use("/api/reminders", requireAuth, reminderRoutes);
-
-
-
-
-// Server start
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

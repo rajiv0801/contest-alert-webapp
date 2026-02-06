@@ -1,11 +1,8 @@
 import dotenv from "dotenv";
-dotenv.config({ path: "D:/Coding/contest-alert-app/backend/.env" });
+dotenv.config();
 
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-
-// Debug (temporary)
-console.log("PASSPORT ENV CHECK:", process.env.GOOGLE_CLIENT_ID);
 
 passport.use(
   new GoogleStrategy(
@@ -16,11 +13,13 @@ passport.use(
     },
     (accessToken, refreshToken, profile, done) => {
       const user = {
+        id: profile.id,
         googleId: profile.id,
         name: profile.displayName,
         email: profile.emails[0].value,
         photo: profile.photos[0].value,
       };
+
       return done(null, user);
     }
   )

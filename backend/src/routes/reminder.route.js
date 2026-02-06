@@ -1,73 +1,43 @@
 import express from "express";
+import Reminder from "../models/reminder.js";
+import { isAuthenticated } from "../middleware/auth.js";
+
 const router = express.Router();
 
-// temporary in-memory store
-// structure: { userId : [ reminders ] }
-const reminderStore = {};
-
-// GET MY REMINDERS
-router.get("/", (req, res) => {
-
-  if (!req.user) {
-    return res.status(401).json({ error: "not logged in" });
-  }
-
-  const userId = req.user.id;
-
-  res.json(reminderStore[userId] || []);
-});
-
-// CREATE REMINDERS FOR PLATFORM
-router.post("/platform/:platform", async (req, res) => {
-
-  if (!req.user) {
-    return res.status(401).json({ error: "not logged in" });
-  }
-
-  const platform = req.params.platform;
-  const userId = req.user.id;
-
+router.post("/create/:platform", isAuthenticated, async (req, res) => {
   try {
+    const { platform } = req.params;
 
-    // call your own contest API
-    const response = await fetch(
-      `http://localhost:5500/api/contests/${platform}`
-    );
-
-    const contests = await response.json();
-
-    if (!reminderStore[userId]) {
-      reminderStore[userId] = [];
-    }
-
-    let added = 0;
-
-    for (let c of contests) {
-
-      const exists = reminderStore[userId].find(
-        (r) => r.contestId === c.id
-      );
-
-      if (!exists) {
-        reminderStore[userId].push({
-          contestId: c.id,
-          name: c.name,
-          platform: c.platform,
-          startTime: c.startTime,
-          url: c.url,
-        });
-
-        added++;
-      }
-    }
-
-    res.json({
-      message: "reminders created",
-      added,
+    const reminder = await Reminder.create({
+      userId: req.user.id,
+      platform,
+      contestName: "platform reminder",
+      startTime: new Date(),
+      reminderTime: new Date(Date.now() + 30 * 60 * 1000),
+      contestLink: "",
     });
 
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(200).json({
+      message: "Reminder created",
+      reminder,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to create reminder",
+      error: error.message,
+    });
+  }
+});
+
+router.get("/my", isAuthenticated, async (req, res) => {
+  try {
+    const reminders = await Reminder.find({
+      userId: req.user.id,
+    });
+
+    res.json(reminders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
