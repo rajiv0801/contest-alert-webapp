@@ -26,6 +26,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const googleBtn = document.getElementById("loginBtn"); // ✅ fixed id
 
+  // -------------------- Reminder Create --------------------
+  async function createReminder(platform) {
+    console.log("Creating reminder for:", platform); // debug
+
+    try {
+      const res = await fetch("http://localhost:5000/api/reminders", {
+        // console.log("Button platform:", platform);
+
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          platform: platform,
+          time: new Date().toISOString(),
+        }),
+      });
+
+      const data = await res.json();
+      console.log("Saved:", data);
+
+      alert("Reminder created for: " + platform);
+    } catch (err) {
+      console.log("Reminder error:", err);
+    }
+  }
+
   // -------------------- DARK MODE --------------------
   const themeToggle = document.getElementById("darkmode-toggle");
 
@@ -259,18 +287,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
       card.innerHTML = `
         <div class="contest-title">${contest.name}</div>
+
         <div class="contest-meta">
           ${formatDate(contest.startTime)} • ${formatTime(contest.startTime)}
         </div>
+
         <div class="contest-footer">
           <span class="platform-badge ${getPlatformBadgeClass(contest.platform)}">
             ${normalizePlatform(contest.platform).toUpperCase()}
           </span>
+
           <a class="contest-link" href="${contest.url}" target="_blank">Open</a>
+
+          <button class="save-btn" data-platform="${contest.platform}">
         </div>
       `;
 
       contestList.appendChild(card);
+
+      card.querySelector(".save-btn").addEventListener("click", (e) => {
+        const platform = e.target.getAttribute("data-platform");
+        createReminder(platform);
+      });
     });
 
     pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
