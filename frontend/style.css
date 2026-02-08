@@ -355,43 +355,34 @@ button:disabled {
 
 /* -------- Platform Badges -------- */
 
-.platform-badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.platform-logo {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));
+}
+
+
+.platform-logo {
+  filter: grayscale(20%);
+  transition: 0.2s;
+}
+
+.contest-card:hover .platform-logo {
+  filter: grayscale(0%);
+}
+
+
+.contest-title {
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.3px;
-  display: inline-block;
-}
-
-/* Codeforces */
-.badge-codeforces {
-  background: #ffe5e5;
-  color: #c62828;
-}
-
-/* LeetCode */
-.badge-leetcode {
-  background: #fff3e0;
-  color: #ef6c00;
-}
-
-/* CodeChef */
-.badge-codechef {
-  background: #ede7f6;
-  color: #5e35b1;
-}
-
-/* AtCoder */
-.badge-atcoder {
-  background: #e3f2fd;
-  color: #1565c0;
-}
-
-/* Fallback */
-.badge-other {
-  background: #eeeeee;
-  color: #424242;
 }
 
 

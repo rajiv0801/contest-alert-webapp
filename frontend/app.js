@@ -1,18 +1,22 @@
-// ------------------- Platform Normalizer -------------------
-function normalizePlatform(raw) {
-  if (!raw) return "other";
-  const p = raw.toLowerCase();
+let selectedContest = null;
 
-  if (p.includes("codeforces")) return "codeforces";
-  if (p.includes("leetcode")) return "leetcode";
-  if (p.includes("atcoder")) return "atcoder";
-  if (p.includes("codechef")) return "codechef";
+// ----------------- For Platform Logo-------------------
 
-  return "other";
-}
+function getPlatformLogo(contest) {
+  const p = (contest.platform || "").toLowerCase();
 
-function getPlatformBadgeClass(raw) {
-  return `badge-${normalizePlatform(raw)}`;
+  if (p === "codechef") return "https://cdn.codechef.com/images/cc-logo.svg";
+
+  if (p === "leetcode")
+    return "https://leetcode.com/static/images/LeetCode_logo.png";
+
+  if (p === "codeforces")
+    return "https://sta.codeforces.com/s/0/images/codeforces-logo.png";
+
+  if (p === "atcoder") return "https://img.atcoder.jp/assets/atcoder.png";
+
+  // final backup
+  return "https://clist.by/static/core/img/default.png";
 }
 
 // -------------------- MAIN APP --------------------
@@ -212,6 +216,8 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((res) => res.json())
       .then((data) => {
         contests = data || [];
+        console.log("REAL CONTEST DATA:", contests[0]);
+
         currentPage = 1;
         renderContests();
       })
@@ -255,6 +261,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // -------------------- Render --------------------
   function renderContests() {
+    if (!Array.isArray(contests)) {
+      console.log("contests not array:", contests);
+      contests = [];
+    }
+
     contestList.innerHTML = "";
 
     const selectedPlatforms = getSelectedPlatforms();
@@ -265,9 +276,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const filtered = contests
-      .filter((c) => selectedPlatforms.includes(normalizePlatform(c.platform)))
-      .sort((a, b) => a.startTime - b.startTime);
+    // ----- SMART PLATFORM MATCH -----
+    const filtered = contests.filter((c) => {
+      const name = (
+        (c.resource && c.resource.name) ||
+        c.platform ||
+        c.host ||
+        ""
+      ).toLowerCase();
+
+      return selectedPlatforms.some((p) => name.includes(p.toLowerCase()));
+    });
+
+    filtered.sort((a, b) => a.startTime - b.startTime);
 
     if (filtered.length === 0) {
       pageInfo.innerText = "";
@@ -275,42 +296,64 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // ----- PAGINATION -----
     const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
     if (currentPage > totalPages) currentPage = totalPages;
 
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     const pageItems = filtered.slice(start, start + ITEMS_PER_PAGE);
 
+    // ----- RENDER CARDS -----
     pageItems.forEach((contest) => {
-      const card = document.createElement("div");
-      card.className = "contest-card";
+      contestList.innerHTML += `
+      <div class="contest-card">
 
-      card.innerHTML = `
-        <div class="contest-title">${contest.name}</div>
+        <div class="modern-card">
 
-        <div class="contest-meta">
-          ${formatDate(contest.startTime)} • ${formatTime(contest.startTime)}
+          <div class="card-header">
+            <span class="time">
+              ${formatDate(contest.startTime)} • ${formatTime(contest.startTime)}
+            </span>
+          </div>
+
+          <div class="card-body">
+            <div class="title-row">
+
+              <img class="platform-logo"
+                src="${getPlatformLogo(contest)}"
+                onerror="this.src='https://clist.by/static/core/img/default.png'" />
+
+              <div class="contest-title">
+                ${contest.name}
+              </div>
+
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <a class="btn-open" href="${contest.url}" target="_blank">
+              Open
+            </a>
+
+            <button class="savebtn"
+                    data-platform="${contest.platform}">
+              Create Reminder
+            </button>
+          </div>
+
         </div>
-
-        <div class="contest-footer">
-          <span class="platform-badge ${getPlatformBadgeClass(contest.platform)}">
-            ${normalizePlatform(contest.platform).toUpperCase()}
-          </span>
-
-          <a class="contest-link" href="${contest.url}" target="_blank">Open</a>
-
-          <button class="save-btn" data-platform="${contest.platform}">
-        </div>
-      `;
-
-      contestList.appendChild(card);
-
-      card.querySelector(".save-btn").addEventListener("click", (e) => {
-        const platform = e.target.getAttribute("data-platform");
-        createReminder(platform);
-      });
+      </div>
+    `;
     });
 
+    // ----- REMINDER BUTTONS -----
+    document.querySelectorAll(".savebtn").forEach((btn) => {
+      btn.onclick = (e) => {
+        createReminder(e.target.getAttribute("data-platform"));
+      };
+    });
+
+    // ----- PAGINATION UI -----
     pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
     prevBtn.disabled = currentPage === 1;
     nextBtn.disabled = currentPage === totalPages;
