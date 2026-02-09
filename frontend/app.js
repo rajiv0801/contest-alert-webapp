@@ -1,4 +1,5 @@
 let selectedContest = null;
+let isUserLoggedIn = false;
 
 // ----------------- For Platform Logo-------------------
 
@@ -32,16 +33,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // -------------------- Reminder Create --------------------
   async function createReminder(platform) {
-    console.log("Creating reminder for:", platform); // debug
+    if (!isUserLoggedIn) {
+      alert("Connect Google account first to create reminders");
+      return;
+    }
 
     try {
       const res = await fetch("http://localhost:5000/api/reminders", {
-        // console.log("Button platform:", platform);
-
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           platform: platform,
@@ -49,12 +49,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }),
       });
 
-      const data = await res.json();
-      console.log("Saved:", data);
+      if (res.status === 401) {
+        alert("Session expired. Please connect again.");
+        return;
+      }
 
-      alert("Reminder created for: " + platform);
+      const data = await res.json();
+      alert("Reminder added for " + platform);
     } catch (err) {
-      console.log("Reminder error:", err);
+      alert("Please connect Google account first");
     }
   }
 
@@ -142,9 +145,12 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!data || !data.loggedIn) {
+          isUserLoggedIn = false;
           resetUserUI();
           return;
         }
+
+        isUserLoggedIn = true;
 
         // Hide connect button
         const loginBtn = document.getElementById("loginBtn");
@@ -348,8 +354,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ----- REMINDER BUTTONS -----
     document.querySelectorAll(".savebtn").forEach((btn) => {
+      if (!isUserLoggedIn) {
+        btn.disabled = true;
+        btn.title = "Connect Google account first";
+      }
+
       btn.onclick = (e) => {
-        createReminder(e.target.getAttribute("data-platform"));
+        const platform = e.target.getAttribute("data-platform");
+        createReminder(platform);
       };
     });
 
