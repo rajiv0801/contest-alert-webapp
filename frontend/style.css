@@ -53,6 +53,73 @@ h1 {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
 
+.card-actions {
+  display: flex;            /* makes items sit side by side */
+  flex-direction: row;
+  gap: 10px;                /* space between buttons */
+  width: 100%;
+}
+
+/* --- FORCE BOTH TO BE IDENTICAL BOXES --- */
+.btn-open,
+.savebtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 35px;              /* SAME HEIGHT */
+  line-height: 1;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  border-radius: 12px;
+
+  box-sizing: border-box;
+
+  text-decoration: none;     /* kill anchor style */
+}
+
+/* --- OPEN (secondary lighter) --- */
+.btn-open {
+  background: #242424;
+  color: #d0d0d0;
+
+  border: 1px solid #2e2e2e;
+}
+
+/* --- CREATE (primary darker) --- */
+.savebtn {
+  background: #1a1a1a;
+  color: white;
+
+  border: 1px solid #2a2a2a;
+}
+
+/* --- REMOVE BROWSER DEFAULTS --- */
+.savebtn {
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+
+.btn-open {
+  padding: 0;
+  margin: 0;
+}
+
+
+.savebtn:hover {
+  background: #222;
+}
+
+.btn-open:hover {
+  background: #2a2a2a;
+}
+
+
+
 body.dark .card {
   background: #3a3a3a;
   color: #ffffff;
