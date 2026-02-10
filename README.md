@@ -1,6 +1,6 @@
 # Contest App
 
-![Tech Stack](https://img.shields.io/badge/Stack-Node_Express_Mongo_Flutter-blue) ![License](https://img.shields.io/badge/License-MIT-green)
+![Tech Stack](https://img.shields.io/badge/Stack-HTML_CSS_Node_Express_Mongo_JavaScript-blue) ![License](https://img.shields.io/badge/License-MIT-green)
 
 A unified platform to track programming contests from multiple platforms, manage reminders, and receive timely notifications.
 
