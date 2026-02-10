@@ -550,3 +550,9 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+
+
+.active-platform {
+  border-left: 3px solid #4caf50;
+}

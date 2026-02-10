@@ -1,5 +1,6 @@
 let selectedContest = null;
 let isUserLoggedIn = false;
+let myReminders = [];
 
 // ----------------- For Platform Logo-------------------
 
@@ -29,7 +30,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const nextBtn = document.getElementById("nextPage");
   const pageInfo = document.getElementById("pageInfo");
 
-  const googleBtn = document.getElementById("loginBtn"); // ✅ fixed id
+  const googleBtn = document.getElementById("loginBtn");
+
+  const mainSaveBtn = document.getElementById("saveBtn");
+
+  if (mainSaveBtn) {
+    mainSaveBtn.onclick = async () => {
+      if (!isUserLoggedIn) {
+        alert("Connect Google account first");
+        return;
+      }
+
+      // If ANY platform already saved → act as STOP ALL
+      if (myReminders.length > 0) {
+        const ok = confirm("Disable all scheduled reminders?");
+        if (!ok) return;
+
+        await deleteAllReminders();
+        return;
+      }
+
+      // otherwise normal create
+      await createForSelectedPlatforms();
+    };
+  }
 
   // -------------------- Reminder Create --------------------
   async function createReminder(platform) {
@@ -61,6 +85,63 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  async function createForSelectedPlatforms() {
+    if (!isUserLoggedIn) {
+      alert("Connect Google account first");
+      return;
+    }
+
+    const platforms = getSelectedPlatforms();
+
+    if (platforms.length === 0) {
+      alert("Select at least one platform checkbox");
+      return;
+    }
+
+    for (const p of platforms) {
+      await createReminder(p);
+    }
+
+    await refreshApp();
+  }
+
+  // -------------------- DELETE REMINDER --------------------
+  async function deleteAllReminders() {
+    try {
+      await fetch("http://localhost:5000/api/reminders/clear/all", {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      myReminders = [];
+      await renderContests();
+    } catch (err) {
+      alert("Unable to remove reminders");
+    }
+  }
+
+  //---------------------- LOAD REMINDER ---------------
+  async function loadMyReminders() {
+    try {
+      const res = await fetch("http://localhost:5000/api/reminders/my", {
+        credentials: "include",
+      });
+
+      myReminders = await res.json();
+    } catch {
+      myReminders = [];
+    }
+  }
+
+  function isSaved(platform) {
+    return myReminders.some((r) => r.platform === platform);
+  }
+
+  async function refreshApp() {
+    await loadMyReminders();
+    renderContests();
+  }
+
   // -------------------- DARK MODE --------------------
   const themeToggle = document.getElementById("darkmode-toggle");
 
@@ -88,10 +169,6 @@ document.addEventListener("DOMContentLoaded", () => {
     googleBtn.addEventListener("click", (e) => {
       e.preventDefault();
 
-      // const ok = confirm("You will be redirected to select a Google account.");
-      // if (!ok) return;
-
-      // Silence network errors during OAuth redirect
       window.addEventListener("beforeunload", () => {
         window.onerror = () => true;
       });
@@ -122,7 +199,6 @@ document.addEventListener("DOMContentLoaded", () => {
       info.innerText = "Please connect Google account to enable reminders";
     }
 
-    // Disable reminder button when logged out
     const reminderBtn = document.getElementById("saveBtn");
     if (reminderBtn) {
       reminderBtn.disabled = true;
@@ -152,11 +228,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         isUserLoggedIn = true;
 
-        // Hide connect button
         const loginBtn = document.getElementById("loginBtn");
         if (loginBtn) loginBtn.style.display = "none";
 
-        // Badge
         const badge = document.getElementById("connectionBadge");
         if (badge) {
           badge.innerText = "Connected";
@@ -164,11 +238,9 @@ document.addEventListener("DOMContentLoaded", () => {
           badge.classList.add("badge-on");
         }
 
-        // User info
         document.getElementById("guestText")?.classList.add("hidden");
         document.getElementById("userInfo")?.classList.remove("hidden");
 
-        // ----- USER INFO SAFE BINDING -----
         const avatarEl = document.getElementById("userAvatar");
         const nameEl = document.getElementById("userName");
         const emailEl = document.getElementById("userEmail");
@@ -182,16 +254,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (nameEl) nameEl.innerText = data.user.name || "";
         if (emailEl) emailEl.innerText = data.user.email || "";
-        // -----------------------------------
 
-        // Enable reminder button when logged in
         const reminderBtn = document.getElementById("saveBtn");
         if (reminderBtn) {
           reminderBtn.disabled = false;
           reminderBtn.title = "";
         }
 
-        // Logout
         const logoutBtn = document.getElementById("logoutBtn");
         if (logoutBtn) {
           logoutBtn.onclick = () => {
@@ -213,6 +282,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
   }
+
+  function updateMainButtonText() {
+  const btn = document.getElementById("saveBtn");
+  if (!btn) return;
+
+  if (myReminders.length > 0) {
+    btn.innerText = "Stop All Reminders";
+  } else {
+    btn.innerText = "Create Reminders";
+  }
+}
+
 
   // -------------------- Fetch Contests --------------------
   function loadContests() {
@@ -238,8 +319,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadUserStatus();
   loadContests();
+  loadMyReminders(); // NEW
 
-  // -------------------- Checkbox Filter --------------------
   platformInputs.forEach((input) => {
     input.addEventListener("change", () => {
       currentPage = 1;
@@ -247,7 +328,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // -------------------- Helpers --------------------
   function getSelectedPlatforms() {
     return Array.from(platformInputs)
       .filter((i) => i.checked)
@@ -276,13 +356,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const selectedPlatforms = getSelectedPlatforms();
 
+    // mark checkboxes if already scheduled
+    platformInputs.forEach((input) => {
+      const p = input.value.toLowerCase();
+      if (isSaved(p)) {
+        input.parentElement.classList.add("active-platform");
+      } else {
+        input.parentElement.classList.remove("active-platform");
+      }
+    });
+
     if (selectedPlatforms.length === 0) {
       pageInfo.innerText = "";
       contestList.innerHTML = `<p class="empty-msg">Select at least one platform.</p>`;
       return;
     }
 
-    // ----- SMART PLATFORM MATCH -----
     const filtered = contests.filter((c) => {
       const name = (
         (c.resource && c.resource.name) ||
@@ -302,18 +391,15 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // ----- PAGINATION -----
     const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
     if (currentPage > totalPages) currentPage = totalPages;
 
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     const pageItems = filtered.slice(start, start + ITEMS_PER_PAGE);
 
-    // ----- RENDER CARDS -----
     pageItems.forEach((contest) => {
       contestList.innerHTML += `
       <div class="contest-card">
-
         <div class="modern-card">
 
           <div class="card-header">
@@ -343,7 +429,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <button class="savebtn"
                     data-platform="${contest.platform}">
-              Create Reminder
+                    ${
+                      isSaved(contest.platform)
+                        ? '<span class="active-tag">Scheduled</span>'
+                        : ""
+                    }
             </button>
           </div>
 
@@ -359,13 +449,26 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.title = "Connect Google account first";
       }
 
-      btn.onclick = (e) => {
+      btn.onclick = async (e) => {
         const platform = e.target.getAttribute("data-platform");
-        createReminder(platform);
+
+        if (!isUserLoggedIn) {
+          alert("Connect Google account first");
+          return;
+        }
+
+        if (isSaved(platform)) {
+          await deleteReminder(platform);
+        } else {
+          await createReminder(platform);
+        }
+
+        await refreshApp();
+        updateMainButtonText();
+
       };
     });
 
-    // ----- PAGINATION UI -----
     pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
     prevBtn.disabled = currentPage === 1;
     nextBtn.disabled = currentPage === totalPages;

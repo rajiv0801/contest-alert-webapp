@@ -37,3 +37,20 @@ router.post("/", isAuthenticated, async (req, res) => {
 });
 
 export default router;
+
+
+// DELETE reminder
+router.delete("/:platform", isAuthenticated, async (req, res) => {
+  try {
+    await Reminder.deleteOne({
+      platform: req.params.platform,
+      userId: req.user.id
+    });
+
+    res.json({ message: "removed" });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
