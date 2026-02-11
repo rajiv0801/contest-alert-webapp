@@ -556,3 +556,39 @@ button:disabled {
 .active-platform {
   border-left: 3px solid #4caf50;
 }
+
+
+#savedReminderBtn {
+ appearance: none;
+ background-color: transparent;
+ border: 0.125em solid #1A1A1A;
+ border-radius: 0.9375em;
+ color: #3B3B3B;
+ cursor: pointer;
+ font-size: 16px;
+ font-weight: 600;
+ padding: 10px 18px;
+ transition: all 0.3s ease;
+}
+
+#savedReminderBtn:hover {
+ color: #fff;
+ background-color: #1A1A1A;
+}
+
+body.dark #savedReminderBtn {
+ border-color: #ffffff;
+ color: #e0e0e0;
+}
+
+body.dark #savedReminderBtn:hover {
+ background-color: #ffffff;
+ color: #000;
+}
+
+@media (max-width: 600px) {
+  #savedReminderBtn {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+  }
+}

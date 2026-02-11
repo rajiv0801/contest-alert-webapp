@@ -1,6 +1,7 @@
 let selectedContest = null;
 let isUserLoggedIn = false;
 let myReminders = [];
+let platformStatus = {};
 
 // ----------------- For Platform Logo-------------------
 
@@ -117,6 +118,15 @@ document.addEventListener("DOMContentLoaded", () => {
       await renderContests();
     } catch (err) {
       alert("Unable to remove reminders");
+    }
+  }
+
+  async function loadPlatformStatus() {
+    try {
+      const res = await fetch("http://localhost:5000/api/contests/status");
+      platformStatus = await res.json();
+    } catch (err) {
+      platformStatus = {};
     }
   }
 
@@ -284,16 +294,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateMainButtonText() {
-  const btn = document.getElementById("saveBtn");
-  if (!btn) return;
+    const btn = document.getElementById("saveBtn");
+    if (!btn) return;
 
-  if (myReminders.length > 0) {
-    btn.innerText = "Stop All Reminders";
-  } else {
-    btn.innerText = "Create Reminders";
+    if (myReminders.length > 0) {
+      btn.innerText = "Stop All Reminders";
+    } else {
+      btn.innerText = "Create Reminders";
+    }
   }
-}
-
 
   // -------------------- Fetch Contests --------------------
   function loadContests() {
@@ -320,6 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadUserStatus();
   loadContests();
   loadMyReminders(); // NEW
+  loadPlatformStatus();
 
   platformInputs.forEach((input) => {
     input.addEventListener("change", () => {
@@ -359,9 +369,29 @@ document.addEventListener("DOMContentLoaded", () => {
     // mark checkboxes if already scheduled
     platformInputs.forEach((input) => {
       const p = input.value.toLowerCase();
-      if (isSaved(p)) {
+
+      const status = platformStatus[p];
+
+      // ----- YOUR NEW LOGIC -----
+      if (status && status.allSaved) {
+        input.checked = true;
+
+        input.onclick = (e) => {
+          e.preventDefault();
+
+          alert(
+            "All contests of this platform are already saved.\n" +
+              "Go to Saved Contests to manage them.",
+          );
+        };
+
+        input.title = "Managed from Saved Contests";
+
         input.parentElement.classList.add("active-platform");
       } else {
+        input.onclick = null;
+        input.title = "";
+
         input.parentElement.classList.remove("active-platform");
       }
     });
@@ -465,7 +495,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         await refreshApp();
         updateMainButtonText();
-
       };
     });
 

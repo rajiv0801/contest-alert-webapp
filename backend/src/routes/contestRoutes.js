@@ -3,7 +3,6 @@ import Contest from "../models/contest.js";
 
 const router = express.Router();
 
-// dynamic import for node-fetch
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
@@ -15,7 +14,6 @@ const headers = {
   Accept: "application/json",
 };
 
-// ---------- Helper to format contests ----------
 const formatContests = (raw, platform) => {
   return (raw || []).map((c) => ({
     id: `clist-${c.id}`,
@@ -27,7 +25,6 @@ const formatContests = (raw, platform) => {
   }));
 };
 
-// ---------- STORE CONTESTS IN DB ----------
 router.post("/contests/sync", async (req, res) => {
   try {
     const contests = req.body;
@@ -43,7 +40,7 @@ router.post("/contests/sync", async (req, res) => {
           url: c.url,
           sourceId: c.id,
         },
-        { upsert: true }
+        { upsert: true },
       );
     }
 
@@ -53,7 +50,6 @@ router.post("/contests/sync", async (req, res) => {
   }
 });
 
-// ---------- GET FROM DB ----------
 router.get("/contests/db", async (req, res) => {
   try {
     const contests = await Contest.find().sort({ startTime: 1 });
@@ -63,7 +59,6 @@ router.get("/contests/db", async (req, res) => {
   }
 });
 
-// ---------- FETCH FROM CLIST (existing) ----------
 router.get("/contests", async (req, res) => {
   try {
     const urls = {
@@ -82,7 +77,7 @@ router.get("/contests", async (req, res) => {
         const r = await fetch(url, { headers });
         const d = await r.json();
         return formatContests(d.objects, platform);
-      })
+      }),
     );
 
     const merged = results.flat().sort((a, b) => a.startTime - b.startTime);
@@ -90,6 +85,32 @@ router.get("/contests", async (req, res) => {
     res.json(merged);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch contests" });
+  }
+});
+
+// -------- NEW: PLATFORM SAVED STATUS --------
+// -------- CORRECT PLATFORM STATUS BASED ON REMINDERS --------
+import Reminder from "../models/reminder.js";
+
+router.get("/contests/status", async (req, res) => {
+  try {
+    const platforms = ["leetcode", "codeforces", "codechef", "atcoder"];
+
+    const result = {};
+
+    for (const p of platforms) {
+      const exists = await Reminder.findOne({
+        $or: [{ platform: p }, { platform: p.toLowerCase() }],
+      });
+
+      result[p] = {
+        allSaved: exists ? true : false,
+      };
+    }
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
