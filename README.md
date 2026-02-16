@@ -21,7 +21,7 @@ A unified platform to track programming contests from multiple platforms, manage
 ### User Module
 - Secure authentication with Passport.js
 - Personalized preferences
-- User specific reminder list
+- User-specific reminder list
 
 ### Admin Module
 - Add or remove contest sources
