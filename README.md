@@ -1,4 +1,4 @@
-# Contest App
+# Contest-Alert App
 
 <!-- ![Tech Stack](https://img.shields.io/badge/Stack-HTML_CSS_Node_Express_Mongo_JavaScript-blue) ![License](https://img.shields.io/badge/License-MIT-green) -->
 
