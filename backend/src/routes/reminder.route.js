@@ -103,13 +103,43 @@ DELETE SINGLE CONTEST REMINDER
 */
 router.delete("/contest/:contestId", isAuthenticated, async (req, res) => {
   try {
-    await Reminder.deleteOne({
-      userId: req.user._id,
+    const { contestId } = req.params;
+    const userId = req.user._id;
+
+    // Check if platform subscription exists
+    const contestReminder = await Reminder.findOne({
+      userId,
       type: "contest",
-      contestId: req.params.contestId,
+      contestId,
+    });
+
+    if (!contestReminder) {
+      return res.status(404).json({ message: "Reminder not found" });
+    }
+
+    const platformSubscription = await Reminder.findOne({
+      userId,
+      type: "platform",
+      platform: contestReminder.platform,
+    });
+
+    if (platformSubscription) {
+      // If subscription active → disable instead of delete
+      contestReminder.disabled = true;
+      await contestReminder.save();
+
+      return res.json({ message: "Contest reminder disabled" });
+    }
+
+    // If no subscription → delete normally
+    await Reminder.deleteOne({
+      userId,
+      type: "contest",
+      contestId,
     });
 
     res.json({ message: "Contest reminder removed" });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
