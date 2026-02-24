@@ -110,7 +110,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function isSaved(platform) {
-    return myReminders.some((r) => r.platform === platform);
+    return reminders.some(
+      (r) => r.platform === platform && r.disabled === false,
+    );
   }
 
   async function refreshApp() {
@@ -331,7 +333,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const selectedPlatforms = getSelectedPlatforms();
 
-
     if (selectedPlatforms.length === 0) {
       pageInfo.innerText = "";
       contestList.innerHTML = `<p class="empty-msg">Select at least one platform.</p>`;
@@ -398,7 +399,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${
                       isSaved(contest.platform)
                         ? '<span class="active-tag">Scheduled</span>'
-                        : ""
+                        : 'Create Reminder '
                     }
             </button>
           </div>

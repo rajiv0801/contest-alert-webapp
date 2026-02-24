@@ -15,6 +15,8 @@ import reminderRoutes from "./src/routes/reminder.route.js";
 
 import connectDB from "./db.js";
 
+import "./cron.js";
+
 connectDB();
 
 const app = express();
