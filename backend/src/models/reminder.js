@@ -19,15 +19,30 @@ const reminderSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Only for contest reminders
-    contestId: String,
-    contestName: String,
-    startTime: Date,
-    contestLink: String,
+    // Used only when type = "contest"
+    contestId: {
+      type: String,
+    },
 
-    reminderTime: Date,
+    contestName: {
+      type: String,
+    },
+
+    startTime: {
+      type: Date,
+    },
+
+    contestLink: {
+      type: String,
+    },
+
+    reminderTime: {
+      type: Date,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 export default mongoose.model("Reminder", reminderSchema);
