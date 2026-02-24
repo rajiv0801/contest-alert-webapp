@@ -109,9 +109,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function isSaved(platform) {
+  function isSaved(contestId) {
     return reminders.some(
-      (r) => r.platform === platform && r.disabled === false,
+      (r) => r.contestId === contestId && r.active === true,
     );
   }
 
@@ -395,11 +395,11 @@ document.addEventListener("DOMContentLoaded", () => {
             </a>
 
             <button class="savebtn"
-                    data-platform="${contest.platform}">
+                    data-platform="${contest.id}">
                     ${
-                      isSaved(contest.platform)
+                      isSaved(contest.id)
                         ? '<span class="active-tag">Scheduled</span>'
-                        : 'Create Reminder '
+                        : "Create Reminder "
                     }
             </button>
           </div>
@@ -417,7 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       btn.onclick = async (e) => {
-        const platform = e.target.getAttribute("data-platform");
+        const contestId = e.target.getAttribute("data-id");
 
         if (!isUserLoggedIn) {
           alert("Connect Google account first");
@@ -425,9 +425,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (isSaved(platform)) {
-          await deleteReminder(platform);
+          await deleteReminder(contestId);
         } else {
-          await createReminder(platform);
+          await createReminder(contestId);
         }
 
         await refreshApp();
