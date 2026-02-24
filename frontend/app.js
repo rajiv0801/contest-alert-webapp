@@ -1,7 +1,6 @@
 let selectedContest = null;
 let isUserLoggedIn = false;
 let myReminders = [];
-let platformStatus = {};
 
 // ----------------- For Platform Logo-------------------
 
@@ -39,15 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
     mainSaveBtn.onclick = async () => {
       if (!isUserLoggedIn) {
         alert("Connect Google account first");
-        return;
-      }
-
-      // If ANY platform already saved → act as STOP ALL
-      if (myReminders.length > 0) {
-        const ok = confirm("Disable all scheduled reminders?");
-        if (!ok) return;
-
-        await deleteAllReminders();
         return;
       }
 
@@ -104,30 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     await refreshApp();
-  }
-
-  // -------------------- DELETE REMINDER --------------------
-  async function deleteAllReminders() {
-    try {
-      await fetch("http://localhost:5000/api/reminders/clear/all", {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      myReminders = [];
-      await renderContests();
-    } catch (err) {
-      alert("Unable to remove reminders");
-    }
-  }
-
-  async function loadPlatformStatus() {
-    try {
-      const res = await fetch("http://localhost:5000/api/contests/status");
-      platformStatus = await res.json();
-    } catch (err) {
-      platformStatus = {};
-    }
   }
 
   //---------------------- LOAD REMINDER ---------------
@@ -329,7 +295,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadUserStatus();
   loadContests();
   loadMyReminders(); // NEW
-  loadPlatformStatus();
 
   platformInputs.forEach((input) => {
     input.addEventListener("change", () => {
@@ -366,35 +331,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const selectedPlatforms = getSelectedPlatforms();
 
-    // mark checkboxes if already scheduled
-    platformInputs.forEach((input) => {
-      const p = input.value.toLowerCase();
-
-      const status = platformStatus[p];
-
-      // ----- YOUR NEW LOGIC -----
-      if (status && status.allSaved) {
-        input.checked = true;
-
-        input.onclick = (e) => {
-          e.preventDefault();
-
-          alert(
-            "All contests of this platform are already saved.\n" +
-              "Go to Saved Contests to manage them.",
-          );
-        };
-
-        input.title = "Managed from Saved Contests";
-
-        input.parentElement.classList.add("active-platform");
-      } else {
-        input.onclick = null;
-        input.title = "";
-
-        input.parentElement.classList.remove("active-platform");
-      }
-    });
 
     if (selectedPlatforms.length === 0) {
       pageInfo.innerText = "";
