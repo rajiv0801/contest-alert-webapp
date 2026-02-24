@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
 import session from "express-session";
@@ -16,25 +19,35 @@ connectDB();
 
 const app = express();
 
+/*
+========================================
+CORS
+========================================
+*/
 app.use(
   cors({
-    origin: "http://localhost:5500",
+    origin: process.env.CLIENT_URL,
     credentials: true,
   })
 );
 
+/*
+========================================
+MIDDLEWARE
+========================================
+*/
 app.use(express.json());
 
 app.use(
   session({
     name: "contest.sid",
-    secret: "contest-secret",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: false,
+      secure: false, // change to true when using HTTPS
       maxAge: 1000 * 60 * 60 * 24,
     },
   })
@@ -43,12 +56,33 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+/*
+========================================
+ROUTES
+========================================
+*/
 app.use("/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api", contestRoutes);
 app.use("/api/reminders", reminderRoutes);
 
-const PORT = 5000;
+/*
+========================================
+GLOBAL ERROR HANDLER
+========================================
+*/
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ message: "Server Error" });
+});
+
+/*
+========================================
+START SERVER
+========================================
+*/
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
