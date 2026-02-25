@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function isSaved(contestId) {
-    return reminders.some(
+    return myReminders.some(
       (r) => r.contestId === contestId && r.active === true,
     );
   }
@@ -395,12 +395,12 @@ document.addEventListener("DOMContentLoaded", () => {
             </a>
 
             <button class="savebtn"
-                    data-platform="${contest.id}">
-                    ${
-                      isSaved(contest.id)
-                        ? '<span class="active-tag">Scheduled</span>'
-                        : "Create Reminder "
-                    }
+              data-id="${contest.id}">
+              ${
+                isSaved(contest.id)
+                  ? '<span class="active-tag">Scheduled</span>'
+                  : "Create Reminder"
+              }
             </button>
           </div>
 
@@ -424,7 +424,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        if (isSaved(platform)) {
+        if (isSaved(contestId)) {
           await deleteReminder(contestId);
         } else {
           await createReminder(contestId);

@@ -1,7 +1,49 @@
 import express from "express";
 import Contest from "../models/contest.js";
+// import { protect } from "../middleware/authMiddleware.js"; // if you have this
 
 const router = express.Router();
+
+const isAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return next();
+  }
+  return res.status(401).json({ message: "Not authenticated" });
+};
+
+router.post("/save", isAuthenticated, async (req, res) => {
+  try {
+    const { contestId, platform, contestDate } = req.body;
+
+    if (!contestId || !platform || !contestDate) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const user = req.user;
+
+    const alreadySaved = user.savedContests.find(
+      (c) => c.contestId === contestId
+    );
+
+    if (alreadySaved) {
+      return res.status(400).json({ message: "Contest already saved" });
+    }
+
+    user.savedContests.push({
+      contestId,
+      platform,
+      contestDate,
+    });
+
+    await user.save();
+
+    res.status(200).json({ message: "Contest saved successfully" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
