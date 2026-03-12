@@ -132,7 +132,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function isSaved(contestId) {
     return myReminders.some(
-      (r) => r.contestId === contestId && r.active === true,
+      (r) => r.type === "contest" && r.contestId === contestId && !r.disabled
+    );
+  }
+
+  function isPlatformSaved(platform) {
+    if(!platform) return false;
+    return myReminders.some(
+      (r) => r.type === "platform" && r.platform.toLowerCase() === platform.toLowerCase()
     );
   }
 
@@ -284,12 +291,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateMainButtonText() {
     const btn = document.getElementById("saveBtn");
+    const selectedPlatforms = getSelectedPlatforms();
     if (!btn) return;
 
-    if (myReminders.length > 0) {
-      btn.innerText = "Stop All Reminders";
+    // Check if ALL selected platforms are saved
+    const allSelectedSaved = selectedPlatforms.length > 0 && selectedPlatforms.every(p => isPlatformSaved(p));
+
+    if (allSelectedSaved) {
+      btn.innerText = "Stop Reminders";
+      btn.onclick = async () => {
+        for (const p of selectedPlatforms) {
+          try {
+            await fetch(`http://localhost:5000/api/reminders/platform/${p}`, {
+              method: "DELETE",
+              credentials: "include"
+            });
+          } catch(err) { console.error(err); }
+        }
+        await refreshApp();
+        updateMainButtonText();
+      }
     } else {
       btn.innerText = "Create Reminders";
+      btn.onclick = async () => {
+        if (!isUserLoggedIn) {
+          alert("Connect Google account first");
+          return;
+        }
+        await createForSelectedPlatforms();
+        updateMainButtonText();
+      };
     }
   }
 
@@ -438,17 +469,23 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       btn.onclick = async (e) => {
-        const contestId = e.target.getAttribute("data-id");
+        const targetBtn = e.target.closest('button');
+        const contestId = targetBtn.getAttribute("data-id");
         const contestObj = contests.find(c => c.id === contestId);
 
         if (!isUserLoggedIn) {
           alert("Connect Google account first");
           return;
         }
+        
+        // Prevent double clicks
+        targetBtn.disabled = true;
 
         if (isSaved(contestId)) {
+          targetBtn.innerHTML = "Creating...";
           await deleteUserReminder("contest", contestId);
         } else if (contestObj) {
+          targetBtn.innerHTML = "Saving...";
           await createReminder(contestObj);
         }
 
@@ -512,32 +549,106 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
+    const platformsMap = {};
+    const contestsMap = {};
+
+    // First pass: identify platform subscriptions
     activeReminders.forEach(reminder => {
-      const isPlatform = reminder.type === "platform";
-      const title = isPlatform ? `${reminder.platform.toUpperCase()} (All Contests)` : reminder.contestName;
-      const details = isPlatform 
-        ? `Reminding before every contest on ${reminder.platform}` 
-        : `${formatDate(reminder.startTime)} • ${formatTime(reminder.startTime)}`;
+      if (reminder.type === "platform") {
+        platformsMap[reminder.platform.toLowerCase()] = {
+          reminder: reminder,
+          contests: []
+        };
+      }
+    });
+
+    // Second pass: group contests
+    activeReminders.forEach(reminder => {
+      if (reminder.type === "contest") {
+        const plat = (reminder.platform || "other").toLowerCase();
+        
+        // If there's an active platform subscription for this contest's platform, group it there
+        if (platformsMap[plat]) {
+          platformsMap[plat].contests.push(reminder);
+        } else {
+          // Otherwise it's a standalone standalone contest
+          if (!contestsMap[plat]) contestsMap[plat] = [];
+          contestsMap[plat].push(reminder);
+        }
+      }
+    });
+
+    // Render grouped platform dropdowns
+    Object.keys(platformsMap).forEach(plat => {
+      const platformReminder = platformsMap[plat].reminder;
+      const associatedContests = platformsMap[plat].contests;
       
-      const badgeClass = isPlatform ? "reminder-type-badge platform" : "reminder-type-badge";
-      const badgeText = isPlatform ? "Platform" : "Contest";
+      let nestedContestsHtml = "";
+      associatedContests.forEach(cRem => {
+         nestedContestsHtml += `
+            <div class="nested-reminder-item">
+               <div class="nested-info">
+                  <span class="nested-title">${cRem.contestName}</span>
+                  <span class="nested-details">${formatDate(cRem.startTime)} • ${formatTime(cRem.startTime)}</span>
+               </div>
+               <button class="delete-reminder-btn tiny" data-type="contest" data-target="${cRem.contestId}">Remove</button>
+            </div>
+         `;
+      });
 
       remindersList.innerHTML += `
-        <div class="reminder-item" data-id="${reminder._id}">
-          <div class="reminder-info">
-            <div class="reminder-title">
-              <span class="${badgeClass}">${badgeText}</span>
-              ${title}
+        <div class="platform-group">
+          <div class="platform-header accordion-toggle">
+            <div class="ph-left">
+              <span class="reminder-type-badge platform">Platform</span>
+              <span class="ph-title">${plat.toUpperCase()} (All Contests)</span>
             </div>
-            <div class="reminder-details">${details}</div>
+            <div class="ph-right">
+              <button class="delete-reminder-btn" data-type="platform" data-target="${plat}">Stop Sync</button>
+              <i class="ri-arrow-down-s-line chevron"></i>
+            </div>
           </div>
-          <button class="delete-reminder-btn" 
-                  data-type="${reminder.type}" 
-                  data-target="${isPlatform ? reminder.platform : reminder.contestId}">
-            Delete
-          </button>
+          <div class="platform-body accordion-body hidden">
+            ${nestedContestsHtml || '<div class="empty-msg" style="padding:10px; font-size:12px; color:#888;">No active contests specifically found for this platform yet.</div>'}
+          </div>
         </div>
       `;
+    });
+
+    // Render standalone contest reminders (if user saved a contest individually, not the whole platform)
+    Object.keys(contestsMap).forEach(plat => {
+      contestsMap[plat].forEach(reminder => {
+         remindersList.innerHTML += `
+           <div class="reminder-item" data-id="${reminder._id}">
+             <div class="reminder-info">
+               <div class="reminder-title">
+                 <span class="reminder-type-badge">Contest</span>
+                 ${reminder.contestName}
+               </div>
+               <div class="reminder-details">${formatDate(reminder.startTime)} • ${formatTime(reminder.startTime)}</div>
+             </div>
+             <button class="delete-reminder-btn" data-type="contest" data-target="${reminder.contestId}">Delete</button>
+           </div>
+         `;
+      });
+    });
+
+    // Add UI toggling for accordions
+    document.querySelectorAll(".accordion-toggle").forEach(header => {
+       header.addEventListener("click", (e) => {
+          if(e.target.closest('.delete-reminder-btn')) return; // ignore delete clicks
+
+          const body = header.nextElementSibling;
+          const chevron = header.querySelector(".chevron");
+          
+          if(body.classList.contains("hidden")) {
+            body.classList.remove("hidden");
+            if(chevron) chevron.style.transform = "rotate(180deg)";
+          } else {
+            body.classList.add("hidden");
+            if(chevron) chevron.style.transform = "rotate(0deg)";
+          }
+       });
     });
 
     // Add event listeners to newly created delete buttons
