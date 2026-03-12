@@ -47,20 +47,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // -------------------- Reminder Create --------------------
-  async function createReminder(platform) {
+  async function createReminder(contest) {
     if (!isUserLoggedIn) {
       alert("Connect Google account first to create reminders");
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/reminders", {
+      const res = await fetch("http://localhost:5000/api/reminders/contest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          platform: platform,
-          time: new Date().toISOString(),
+          contestId: contest.id,
+          contestName: contest.name,
+          platform: contest.platform,
+          startTime: contest.startTime,
+          contestLink: contest.url,
+          reminderTime: new Date(new Date(contest.startTime).getTime() - 15 * 60000).toISOString() // 15 mins before by default or use alertTime
         }),
       });
 
@@ -70,9 +74,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const data = await res.json();
-      alert("Reminder added for " + platform);
+      if (!res.ok) throw new Error(data.message || "Failed to create reminder");
+      
+      alert("Reminder added for " + contest.name);
     } catch (err) {
-      alert("Please connect Google account first");
+      alert(err.message || "Please connect Google account first");
     }
   }
 
@@ -90,9 +96,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     for (const p of platforms) {
-      await createReminder(p);
+      try {
+        const res = await fetch("http://localhost:5000/api/reminders/platform", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ platform: p }),
+        });
+        
+        if (res.status === 401) {
+          alert("Session expired. Please connect again.");
+          return;
+        }
+      } catch (err) {
+        console.error("Failed to subscribe to platform", p, err);
+      }
     }
-
+    
+    alert("Subscribed to selected platforms!");
     await refreshApp();
   }
 
@@ -418,6 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       btn.onclick = async (e) => {
         const contestId = e.target.getAttribute("data-id");
+        const contestObj = contests.find(c => c.id === contestId);
 
         if (!isUserLoggedIn) {
           alert("Connect Google account first");
@@ -425,9 +447,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (isSaved(contestId)) {
-          await deleteReminder(contestId);
-        } else {
-          await createReminder(contestId);
+          await deleteUserReminder("contest", contestId);
+        } else if (contestObj) {
+          await createReminder(contestObj);
         }
 
         await refreshApp();
@@ -438,6 +460,129 @@ document.addEventListener("DOMContentLoaded", () => {
     pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
     prevBtn.disabled = currentPage === 1;
     nextBtn.disabled = currentPage === totalPages;
+  }
+
+  // -------------------- Saved Reminders Modal --------------------
+  const savedReminderBtn = document.getElementById("savedReminderBtn");
+  const modal = document.getElementById("savedRemindersModal");
+  const closeModal = document.querySelector(".close-modal");
+  const remindersLoader = document.getElementById("remindersLoader");
+  const remindersList = document.getElementById("remindersList");
+
+  if (savedReminderBtn && modal && closeModal) {
+    savedReminderBtn.addEventListener("click", () => {
+      if (!isUserLoggedIn) {
+        alert("Connect Google account first to view your reminders.");
+        return;
+      }
+      modal.classList.remove("hidden");
+      renderSavedReminders();
+    });
+
+    closeModal.addEventListener("click", () => {
+      modal.classList.add("hidden");
+    });
+
+    // Close when clicking outside of the modal
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.classList.add("hidden");
+      }
+    });
+  }
+
+  async function renderSavedReminders() {
+    remindersList.innerHTML = "";
+    remindersLoader.style.display = "block";
+
+    await loadMyReminders(); // ensure we have fresh data
+    
+    remindersLoader.style.display = "none";
+
+    if (!myReminders || myReminders.length === 0) {
+      remindersList.innerHTML = `<p class="empty-msg" style="text-align: center; color: #666;">You don't have any saved reminders yet.</p>`;
+      return;
+    }
+
+    // Separate active ones; filter out disabled or past reminders if necessary
+    const activeReminders = myReminders.filter(r => !r.disabled);
+    
+    if(activeReminders.length === 0){
+        remindersList.innerHTML = `<p class="empty-msg" style="text-align: center; color: #666;">No active reminders found.</p>`;
+        return;
+    }
+
+    activeReminders.forEach(reminder => {
+      const isPlatform = reminder.type === "platform";
+      const title = isPlatform ? `${reminder.platform.toUpperCase()} (All Contests)` : reminder.contestName;
+      const details = isPlatform 
+        ? `Reminding before every contest on ${reminder.platform}` 
+        : `${formatDate(reminder.startTime)} • ${formatTime(reminder.startTime)}`;
+      
+      const badgeClass = isPlatform ? "reminder-type-badge platform" : "reminder-type-badge";
+      const badgeText = isPlatform ? "Platform" : "Contest";
+
+      remindersList.innerHTML += `
+        <div class="reminder-item" data-id="${reminder._id}">
+          <div class="reminder-info">
+            <div class="reminder-title">
+              <span class="${badgeClass}">${badgeText}</span>
+              ${title}
+            </div>
+            <div class="reminder-details">${details}</div>
+          </div>
+          <button class="delete-reminder-btn" 
+                  data-type="${reminder.type}" 
+                  data-target="${isPlatform ? reminder.platform : reminder.contestId}">
+            Delete
+          </button>
+        </div>
+      `;
+    });
+
+    // Add event listeners to newly created delete buttons
+    document.querySelectorAll(".delete-reminder-btn").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        const type = e.target.getAttribute("data-type");
+        const target = e.target.getAttribute("data-target");
+        
+        const confirmMsg = type === "platform" 
+          ? `Are you sure you want to remove ALL reminders for ${target}?` 
+          : "Remove this contest reminder?";
+          
+        if(confirm(confirmMsg)) {
+          e.target.innerText = "Deleting...";
+          e.target.disabled = true;
+          await deleteUserReminder(type, target);
+          await renderSavedReminders(); // Re-render the list
+          await refreshApp(); // Refresh main UI
+          updateMainButtonText();
+        }
+      });
+    });
+  }
+
+  async function deleteUserReminder(type, target) {
+    try {
+      let url = "";
+      if (type === "platform") {
+        url = `http://localhost:5000/api/reminders/platform/${target}`;
+      } else {
+        url = `http://localhost:5000/api/reminders/contest/${target}`;
+      }
+
+      const res = await fetch(url, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.message || "Failed to delete");
+      
+    } catch(err) {
+      console.error("Delete reminder error:", err);
+      alert("Error deleting reminder: " + err.message);
+    }
   }
 
   // -------------------- Pagination --------------------
