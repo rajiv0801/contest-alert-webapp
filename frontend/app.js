@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to create reminder");
-      
+
       alert("Reminder added for " + contest.name);
     } catch (err) {
       alert(err.message || "Please connect Google account first");
@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
           credentials: "include",
           body: JSON.stringify({ platform: p }),
         });
-        
+
         if (res.status === 401) {
           alert("Session expired. Please connect again.");
           return;
@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Failed to subscribe to platform", p, err);
       }
     }
-    
+
     alert("Subscribed to selected platforms!");
     await refreshApp();
   }
@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function isPlatformSaved(platform) {
-    if(!platform) return false;
+    if (!platform) return false;
     return myReminders.some(
       (r) => r.type === "platform" && r.platform.toLowerCase() === platform.toLowerCase()
     );
@@ -306,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
               method: "DELETE",
               credentials: "include"
             });
-          } catch(err) { console.error(err); }
+          } catch (err) { console.error(err); }
         }
         await refreshApp();
         updateMainButtonText();
@@ -432,7 +432,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
               <img class="platform-logo"
                 src="${getPlatformLogo(contest)}"
-                onerror="this.src='https://clist.by/static/core/img/default.png'" />
+                onerror="this.onerror=null; this.src='https://clist.by/static/core/img/default.png'" />
 
               <div class="contest-title">
                 ${contest.name}
@@ -448,11 +448,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <button class="savebtn"
               data-id="${contest.id}">
-              ${
-                isSaved(contest.id)
-                  ? '<span class="active-tag">Scheduled</span>'
-                  : "Create Reminder"
-              }
+              ${isSaved(contest.id)
+          ? '<span class="active-tag">Scheduled</span>'
+          : "Create Reminder"
+        }
             </button>
           </div>
 
@@ -477,7 +476,7 @@ document.addEventListener("DOMContentLoaded", () => {
           alert("Connect Google account first");
           return;
         }
-        
+
         // Prevent double clicks
         targetBtn.disabled = true;
 
@@ -533,7 +532,7 @@ document.addEventListener("DOMContentLoaded", () => {
     remindersLoader.style.display = "block";
 
     await loadMyReminders(); // ensure we have fresh data
-    
+
     remindersLoader.style.display = "none";
 
     if (!myReminders || myReminders.length === 0) {
@@ -543,10 +542,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Separate active ones; filter out disabled or past reminders if necessary
     const activeReminders = myReminders.filter(r => !r.disabled);
-    
-    if(activeReminders.length === 0){
-        remindersList.innerHTML = `<p class="empty-msg" style="text-align: center; color: #666;">No active reminders found.</p>`;
-        return;
+
+    if (activeReminders.length === 0) {
+      remindersList.innerHTML = `<p class="empty-msg" style="text-align: center; color: #666;">No active reminders found.</p>`;
+      return;
     }
 
     const platformsMap = {};
@@ -566,7 +565,7 @@ document.addEventListener("DOMContentLoaded", () => {
     activeReminders.forEach(reminder => {
       if (reminder.type === "contest") {
         const plat = (reminder.platform || "other").toLowerCase();
-        
+
         // If there's an active platform subscription for this contest's platform, group it there
         if (platformsMap[plat]) {
           platformsMap[plat].contests.push(reminder);
@@ -582,13 +581,16 @@ document.addEventListener("DOMContentLoaded", () => {
     Object.keys(platformsMap).forEach(plat => {
       const platformReminder = platformsMap[plat].reminder;
       const associatedContests = platformsMap[plat].contests;
-      
+
       let nestedContestsHtml = "";
       associatedContests.forEach(cRem => {
-         nestedContestsHtml += `
+        nestedContestsHtml += `
             <div class="nested-reminder-item">
                <div class="nested-info">
-                  <span class="nested-title">${cRem.contestName}</span>
+                  <div class="title-row">
+                    <img class="platform-logo" src="${getPlatformLogo(cRem)}" onerror="this.onerror=null; this.src='/assets/default.png'" />
+                    <span class="nested-title">${cRem.contestName}</span>
+                  </div>
                   <span class="nested-details">${formatDate(cRem.startTime)} • ${formatTime(cRem.startTime)}</span>
                </div>
                <button class="delete-reminder-btn tiny" data-type="contest" data-target="${cRem.contestId}">Remove</button>
@@ -600,7 +602,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="platform-group">
           <div class="platform-header accordion-toggle">
             <div class="ph-left">
-              <span class="reminder-type-badge platform">Platform</span>
+              <img class="platform-logo" src="${getPlatformLogo(plat)}" onerror="this.onerror=null; this.src='/assets/default.png'" />
               <span class="ph-title">${plat.toUpperCase()} (All Contests)</span>
             </div>
             <div class="ph-right">
@@ -618,12 +620,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Render standalone contest reminders (if user saved a contest individually, not the whole platform)
     Object.keys(contestsMap).forEach(plat => {
       contestsMap[plat].forEach(reminder => {
-         remindersList.innerHTML += `
+        remindersList.innerHTML += `
            <div class="reminder-item" data-id="${reminder._id}">
              <div class="reminder-info">
-               <div class="reminder-title">
-                 <span class="reminder-type-badge">Contest</span>
-                 ${reminder.contestName}
+               <div class="title-row">
+                 <img class="platform-logo" src="${getPlatformLogo(reminder)}" onerror="this.onerror=null; this.src='/assets/default.png'" />
+                 <span class="reminder-title">${reminder.contestName}</span>
                </div>
                <div class="reminder-details">${formatDate(reminder.startTime)} • ${formatTime(reminder.startTime)}</div>
              </div>
@@ -635,20 +637,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Add UI toggling for accordions
     document.querySelectorAll(".accordion-toggle").forEach(header => {
-       header.addEventListener("click", (e) => {
-          if(e.target.closest('.delete-reminder-btn')) return; // ignore delete clicks
+      header.addEventListener("click", (e) => {
+        if (e.target.closest('.delete-reminder-btn')) return; // ignore delete clicks
 
-          const body = header.nextElementSibling;
-          const chevron = header.querySelector(".chevron");
-          
-          if(body.classList.contains("hidden")) {
-            body.classList.remove("hidden");
-            if(chevron) chevron.style.transform = "rotate(180deg)";
-          } else {
-            body.classList.add("hidden");
-            if(chevron) chevron.style.transform = "rotate(0deg)";
-          }
-       });
+        const body = header.nextElementSibling;
+        const chevron = header.querySelector(".chevron");
+
+        if (body.classList.contains("hidden")) {
+          body.classList.remove("hidden");
+          if (chevron) chevron.style.transform = "rotate(180deg)";
+        } else {
+          body.classList.add("hidden");
+          if (chevron) chevron.style.transform = "rotate(0deg)";
+        }
+      });
     });
 
     // Add event listeners to newly created delete buttons
@@ -656,12 +658,12 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.addEventListener("click", async (e) => {
         const type = e.target.getAttribute("data-type");
         const target = e.target.getAttribute("data-target");
-        
-        const confirmMsg = type === "platform" 
-          ? `Are you sure you want to remove ALL reminders for ${target}?` 
+
+        const confirmMsg = type === "platform"
+          ? `Are you sure you want to remove ALL reminders for ${target}?`
           : "Remove this contest reminder?";
-          
-        if(confirm(confirmMsg)) {
+
+        if (confirm(confirmMsg)) {
           e.target.innerText = "Deleting...";
           e.target.disabled = true;
           await deleteUserReminder(type, target);
@@ -686,11 +688,11 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "DELETE",
         credentials: "include"
       });
-      
+
       const data = await res.json();
-      if(!res.ok) throw new Error(data.message || "Failed to delete");
-      
-    } catch(err) {
+      if (!res.ok) throw new Error(data.message || "Failed to delete");
+
+    } catch (err) {
       console.error("Delete reminder error:", err);
       alert("Error deleting reminder: " + err.message);
     }
